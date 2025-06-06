@@ -43,14 +43,43 @@ export const fireBomb = (
     console.log('Force applied to bomb at position:', bomb.position);
   }, 10);
 
-  setBombsLeft(prev => prev - 1);
-  setGameStarted(true);
+  // Explode bomb after 3 seconds
+  setTimeout(() => {
+    console.log('Bomb exploding at position:', bomb.position);
+    explodeBomb(engine, bomb);
+  }, 3000);
 
-  // Remove bomb after 8 seconds
+  // Remove bomb after 8 seconds (cleanup)
   setTimeout(() => {
     console.log('Removing bomb from world');
     World.remove(engine.world, bomb);
   }, 8000);
 
+  setBombsLeft(prev => prev - 1);
+  setGameStarted(true);
+
   toast(`Bomb fired! ${bombsLeft - 1} bombs remaining`);
+};
+
+const explodeBomb = (engine: Engine, bomb: Body) => {
+  const explosionRadius = 150;
+  const explosionForce = 0.05;
+  
+  console.log('Creating explosion at:', bomb.position);
+  
+  engine.world.bodies.forEach((body) => {
+    if (body.label === 'block' && !body.isStatic) {
+      const distance = Math.sqrt(
+        Math.pow(body.position.x - bomb.position.x, 2) + 
+        Math.pow(body.position.y - bomb.position.y, 2)
+      );
+      
+      if (distance < explosionRadius) {
+        const forceX = (body.position.x - bomb.position.x) / distance * explosionForce;
+        const forceY = (body.position.y - bomb.position.y) / distance * explosionForce;
+        Body.applyForce(body, body.position, { x: forceX, y: forceY });
+        console.log('Explosion force applied to block:', body.id);
+      }
+    }
+  });
 };
