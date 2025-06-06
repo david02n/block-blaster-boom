@@ -1,4 +1,3 @@
-
 import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -63,7 +62,7 @@ export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
 };
 
 export const createBomb = (x: number, y: number) => {
-  return Bodies.circle(x, y, 15, {
+  return Bodies.circle(x, y, 30, { // Doubled radius from 15 to 30
     label: 'bomb',
     restitution: 0.3,
     friction: 0.4,
@@ -72,8 +71,8 @@ export const createBomb = (x: number, y: number) => {
       fillStyle: '#FF0000', // Fallback red color if sprite fails
       sprite: {
         texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
-        xScale: 0.08,
-        yScale: 0.08,
+        xScale: 0.16, // Doubled from 0.08 to 0.16
+        yScale: 0.16, // Doubled from 0.08 to 0.16
       }
     },
   });
