@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 export const Game = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const gameState = useGameState();
-  const { engineRef, renderRef, recreateBuildings, removeBodiesExceptStatic } = usePhysicsEngine(sceneRef);
+  const { engineRef, renderRef, recreateBuildings, removeBodiesExceptStatic, scale } = usePhysicsEngine(sceneRef);
 
   // Setup collision detection when engine is ready
   useEffect(() => {
@@ -20,9 +20,10 @@ export const Game = () => {
       engineRef.current,
       gameState.destroyedBlocksRef,
       gameState.setBlocksDestroyed,
-      gameState.setScore
+      gameState.setScore,
+      scale
     );
-  }, [engineRef.current, gameState]);
+  }, [engineRef.current, gameState, scale]);
 
   const handleFireBomb = () => {
     if (!engineRef.current) return;
@@ -34,7 +35,8 @@ export const Game = () => {
       gameState.angle,
       gameState.bombsLeft,
       gameState.setBombsLeft,
-      gameState.setGameStarted
+      gameState.setGameStarted,
+      scale
     );
   };
 
@@ -57,23 +59,25 @@ export const Game = () => {
     <div className="min-h-screen bg-gradient-to-b from-sky-200 to-sky-50 flex flex-col">
       <div className="flex-1 flex">
         <div className="flex-1 flex justify-center items-center p-4">
-          <div 
-            ref={sceneRef} 
-            className="border-2 border-gray-300 rounded-lg shadow-lg"
-            style={{ 
-              width: '1200px',
-              height: '600px',
-              backgroundImage: 'url(/lovable-uploads/background.png)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
-          />
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
-            <div className="space-y-2 text-sm font-semibold">
-              <div className="text-primary">Score: {gameState.score}</div>
-              <div className="text-orange-600">Blocks Destroyed: {gameState.blocksDestroyed}</div>
-              <div className="text-red-600">Bombs Left: {gameState.bombsLeft}</div>
+          <div className="relative w-full max-w-6xl">
+            <div 
+              ref={sceneRef} 
+              className="w-full border-2 border-gray-300 rounded-lg shadow-lg"
+              style={{ 
+                aspectRatio: '2/1', // Maintain 2:1 aspect ratio (1200:600)
+                backgroundImage: 'url(/lovable-uploads/background.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            />
+            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
+              <div className="space-y-2 text-sm font-semibold">
+                <div className="text-primary">Score: {gameState.score}</div>
+                <div className="text-orange-600">Blocks Destroyed: {gameState.blocksDestroyed}</div>
+                <div className="text-red-600">Bombs Left: {gameState.bombsLeft}</div>
+                <div className="text-gray-500 text-xs">Scale: {(scale * 100).toFixed(0)}%</div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,26 +1,34 @@
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Engine, Render, World, Runner, Mouse, MouseConstraint } from 'matter-js';
 import { createLargeTower, createGround, createCatapult } from '../utils/gameObjects';
+import { calculateScale } from '../utils/scalingUtils';
 
 export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   const engineRef = useRef<Engine>();
   const renderRef = useRef<Render>();
   const runnerRef = useRef<Runner>();
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     if (!sceneRef.current) return;
 
-    // Use fixed dimensions instead of responsive sizing
-    const canvasWidth = 1200;
-    const canvasHeight = 600;
+    // Get container dimensions
+    const container = sceneRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const canvasWidth = containerRect.width;
+    const canvasHeight = containerRect.height;
+
+    // Calculate scale factor
+    const scaleConfig = calculateScale(canvasWidth, canvasHeight);
+    setScale(scaleConfig.scale);
 
     // Create engine
     const engine = Engine.create();
     engine.world.gravity.y = 0.8;
     engineRef.current = engine;
 
-    // Create renderer with fixed dimensions
+    // Create renderer with dynamic dimensions
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
@@ -39,16 +47,16 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const runner = Runner.create();
     runnerRef.current = runner;
 
-    // Create segmented ground with gaps
-    const groundSegments = createGround(canvasWidth, canvasHeight);
+    // Create segmented ground with gaps using scale
+    const groundSegments = createGround(canvasWidth, canvasHeight, scaleConfig.scale);
     World.add(engine.world, groundSegments);
 
-    const catapult = createCatapult(canvasWidth, canvasHeight);
+    const catapult = createCatapult(canvasWidth, canvasHeight, scaleConfig.scale);
     World.add(engine.world, catapult);
 
     // Position single large tower properly on the right ground segment
-    const groundLevel = canvasHeight - 10;
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel);
+    const groundLevel = canvasHeight - (10 * scaleConfig.scale);
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel, scaleConfig.scale);
     World.add(engine.world, largeTower);
 
     // Add mouse control
@@ -64,11 +72,29 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     });
     World.add(engine.world, mouseConstraint);
 
+    // Handle resize
+    const handleResize = () => {
+      if (!render || !sceneRef.current) return;
+      
+      const newRect = sceneRef.current.getBoundingClientRect();
+      const newScaleConfig = calculateScale(newRect.width, newRect.height);
+      
+      render.canvas.width = newRect.width;
+      render.canvas.height = newRect.height;
+      render.options.width = newRect.width;
+      render.options.height = newRect.height;
+      
+      setScale(newScaleConfig.scale);
+    };
+
+    window.addEventListener('resize', handleResize);
+
     // Start the engine and renderer
     Runner.run(runner, engine);
     Render.run(render);
 
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (renderRef.current) {
         Render.stop(renderRef.current);
       }
@@ -80,15 +106,17 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   }, [sceneRef]);
 
   const recreateBuildings = () => {
-    if (!engineRef.current || !renderRef.current) return;
+    if (!engineRef.current || !renderRef.current || !sceneRef.current) return;
 
-    // Use fixed dimensions
-    const canvasWidth = 1200;
-    const canvasHeight = 600;
-    const groundLevel = canvasHeight - 10;
+    // Get current dimensions and scale
+    const containerRect = sceneRef.current.getBoundingClientRect();
+    const canvasWidth = containerRect.width;
+    const canvasHeight = containerRect.height;
+    const scaleConfig = calculateScale(canvasWidth, canvasHeight);
+    const groundLevel = canvasHeight - (10 * scaleConfig.scale);
 
     // Create single large tower on the right ground segment
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel);
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel, scaleConfig.scale);
     World.add(engineRef.current.world, largeTower);
   };
 
@@ -106,5 +134,6 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     renderRef,
     recreateBuildings,
     removeBodiesExceptStatic,
+    scale,
   };
 };

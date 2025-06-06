@@ -1,14 +1,14 @@
-
 import { Bodies, Body } from 'matter-js';
+import { scaleValue, scalePosition } from './scalingUtils';
 
-export const createGround = (canvasWidth: number, canvasHeight: number) => {
+export const createGround = (canvasWidth: number, canvasHeight: number, scale: number) => {
   // Create segmented ground with gaps - positioned at the very bottom
-  const groundY = canvasHeight - 10;
-  const groundHeight = 20;
+  const groundY = canvasHeight - scaleValue(10, scale);
+  const groundHeight = scaleValue(20, scale);
   const grounds = [];
   
-  // Left ground segment (under catapult area) - fixed positioning
-  const leftGroundWidth = 540; // Fixed width instead of percentage
+  // Left ground segment (under catapult area) - scaled positioning
+  const leftGroundWidth = scaleValue(540, scale);
   const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
@@ -20,9 +20,9 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
   });
   grounds.push(leftGround);
   
-  // Right ground segment (under building area) - fixed positioning
-  const rightGroundStart = 720; // Fixed position instead of percentage
-  const rightGroundWidth = 480; // Fixed width instead of percentage
+  // Right ground segment (under building area) - scaled positioning
+  const rightGroundStart = scaleValue(720, scale);
+  const rightGroundWidth = scaleValue(480, scale);
   const rightGround = Bodies.rectangle(
     rightGroundStart + rightGroundWidth / 2, 
     groundY, 
@@ -43,29 +43,29 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
   return grounds;
 };
 
-export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
-  // Fixed position for catapult
-  const x = 240; // Fixed position instead of percentage
-  const groundLevel = canvasHeight - 10;
-  const catapultHeight = 180; // Increased height again to position catapult even higher
-  const y = groundLevel - catapultHeight; // This will position the catapult much higher above ground
+export const createCatapult = (canvasWidth: number, canvasHeight: number, scale: number) => {
+  // Scaled position for catapult
+  const x = scaleValue(240, scale);
+  const groundLevel = canvasHeight - scaleValue(10, scale);
+  const catapultHeight = scaleValue(180, scale);
+  const y = groundLevel - catapultHeight;
   
-  return Bodies.rectangle(x, y, 120, 120, {
+  return Bodies.rectangle(x, y, scaleValue(120, scale), scaleValue(120, scale), {
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#8B4513',
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
-        xScale: 0.6,
-        yScale: 0.6,
+        xScale: 0.6 * scale,
+        yScale: 0.6 * scale,
       }
     },
   });
 };
 
-export const createBomb = (x: number, y: number) => {
-  return Bodies.circle(x, y, 30, {
+export const createBomb = (x: number, y: number, scale: number) => {
+  return Bodies.circle(x, y, scaleValue(30, scale), {
     label: 'bomb',
     restitution: 0.3,
     friction: 0.4,
@@ -74,24 +74,24 @@ export const createBomb = (x: number, y: number) => {
       fillStyle: '#FF0000',
       sprite: {
         texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
-        xScale: 0.16,
-        yScale: 0.16,
+        xScale: 0.16 * scale,
+        yScale: 0.16 * scale,
       }
     },
   });
 };
 
-export const createLargeTower = (x: number, groundY: number) => {
+export const createLargeTower = (x: number, groundY: number, scale: number) => {
   const blocks = [];
-  const blockWidth = 30;
-  const blockHeight = 20;
+  const blockWidth = scaleValue(30, scale);
+  const blockHeight = scaleValue(20, scale);
   
   // Create a tower - 12 blocks wide by 20 blocks high
   const width = 12;
   const height = 20;
 
   // Calculate the actual ground surface level
-  const actualGroundLevel = groundY + 10;
+  const actualGroundLevel = groundY + scaleValue(10, scale);
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
@@ -122,8 +122,8 @@ export const createLargeTower = (x: number, groundY: number) => {
 };
 
 // Legacy function for backwards compatibility
-export const createBuilding = (x: number, groundY: number, width?: number, height?: number) => {
-  return createLargeTower(x, groundY);
+export const createBuilding = (x: number, groundY: number, width?: number, height?: number, scale: number = 1) => {
+  return createLargeTower(x, groundY, scale);
 };
 
 const getChineseFlagBlockColor = (row: number, col: number, width: number, height: number): string => {

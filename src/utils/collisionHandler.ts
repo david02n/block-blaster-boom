@@ -1,10 +1,13 @@
+
 import { Events, Engine, Body, World, Bodies } from 'matter-js';
+import { scaleValue } from './scalingUtils';
 
 export const setupCollisionDetection = (
   engine: Engine,
   destroyedBlocksRef: React.MutableRefObject<Set<Body>>,
   setBlocksDestroyed: (value: React.SetStateAction<number>) => void,
-  setScore: (value: React.SetStateAction<number>) => void
+  setScore: (value: React.SetStateAction<number>) => void,
+  scale: number = 1
 ) => {
   Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
@@ -27,7 +30,7 @@ export const setupCollisionDetection = (
           // Check if block should explode (increased from 4 to 8 hits for direct bomb hits)
           if ((block as any).hitCount >= 8) {
             console.log('Block exploding after', (block as any).hitCount, 'hits');
-            explodeBlock(engine, block, destroyedBlocksRef, setBlocksDestroyed, setScore);
+            explodeBlock(engine, block, destroyedBlocksRef, setBlocksDestroyed, setScore, scale);
           } else {
             // Block hit but not destroyed - change appearance to show damage
             block.render.fillStyle = darkenColor(block.render.fillStyle as string);
@@ -83,7 +86,8 @@ const explodeBlock = (
   block: Body,
   destroyedBlocksRef: React.MutableRefObject<Set<Body>>,
   setBlocksDestroyed: (value: React.SetStateAction<number>) => void,
-  setScore: (value: React.SetStateAction<number>) => void
+  setScore: (value: React.SetStateAction<number>) => void,
+  scale: number = 1
 ) => {
   // Mark this block as destroyed
   destroyedBlocksRef.current.add(block);
@@ -92,7 +96,7 @@ const explodeBlock = (
   
   console.log('Block exploding at position:', block.position);
   
-  const explosionRadius = 80; // Smaller radius for cascade effect
+  const explosionRadius = scaleValue(80, scale); // Scaled explosion radius
   const explosionForce = 15;
   
   // Create visual explosion effect
@@ -135,7 +139,7 @@ const explodeBlock = (
         if ((affectedBlock as any).hitCount >= 8) {
           console.log('Cascade explosion triggered for block:', affectedBlock.id);
           // Recursive explosion!
-          explodeBlock(engine, affectedBlock, destroyedBlocksRef, setBlocksDestroyed, setScore);
+          explodeBlock(engine, affectedBlock, destroyedBlocksRef, setBlocksDestroyed, setScore, scale);
         } else {
           // Just damage the block
           affectedBlock.render.fillStyle = darkenColor(affectedBlock.render.fillStyle as string);
