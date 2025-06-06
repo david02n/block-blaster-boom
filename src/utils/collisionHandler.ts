@@ -1,4 +1,4 @@
-import { Events, Engine, Body, World } from 'matter-js';
+import { Events, Engine, Body, World, Bodies } from 'matter-js';
 
 export const setupCollisionDetection = (
   engine: Engine,
