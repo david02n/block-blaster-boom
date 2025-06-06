@@ -51,9 +51,9 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const runner = Runner.create();
     runnerRef.current = runner;
 
-    // Create world objects positioned on the actual ground level
-    const ground = createGround(canvasWidth, canvasHeight);
-    World.add(engine.world, ground);
+    // Create segmented ground with gaps
+    const groundSegments = createGround(canvasWidth, canvasHeight);
+    World.add(engine.world, groundSegments);
 
     const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);

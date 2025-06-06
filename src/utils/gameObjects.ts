@@ -1,18 +1,45 @@
-
-import { Bodies } from 'matter-js';
+import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
-  // Position ground at the bottom where the green grass is visible
+  // Create segmented ground with gaps
   const groundY = canvasHeight - 40; // Near the bottom of the screen
-  return Bodies.rectangle(canvasWidth / 2, groundY, canvasWidth, 80, {
+  const groundHeight = 80;
+  const grounds = [];
+  
+  // Left ground segment (under catapult area)
+  const leftGroundWidth = canvasWidth * 0.35; // 35% of screen width
+  const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
     render: {
-      fillStyle: 'transparent', // Make ground invisible
-      strokeStyle: 'transparent', // Make border invisible
+      fillStyle: 'transparent',
+      strokeStyle: 'transparent',
       lineWidth: 0,
     },
   });
+  grounds.push(leftGround);
+  
+  // Right ground segment (under building area)
+  const rightGroundStart = canvasWidth * 0.55; // Start at 55% of screen width
+  const rightGroundWidth = canvasWidth * 0.45; // 45% of screen width
+  const rightGround = Bodies.rectangle(
+    rightGroundStart + rightGroundWidth / 2, 
+    groundY, 
+    rightGroundWidth, 
+    groundHeight, 
+    {
+      isStatic: true,
+      label: 'ground',
+      render: {
+        fillStyle: 'transparent',
+        strokeStyle: 'transparent',
+        lineWidth: 0,
+      },
+    }
+  );
+  grounds.push(rightGround);
+  
+  return grounds;
 };
 
 export const createCatapult = (canvasWidth: number, canvasHeight: number) => {

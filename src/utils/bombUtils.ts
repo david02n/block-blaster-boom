@@ -1,3 +1,4 @@
+
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { audioManager } from './audioUtils';
@@ -59,13 +60,9 @@ export const fireBomb = (
   setTimeout(() => {
     console.log('Bomb exploding at position:', bomb.position);
     explodeBomb(engine, bomb);
-  }, 3000);
-
-  // Remove bomb after 8 seconds (cleanup)
-  setTimeout(() => {
-    console.log('Removing bomb from world');
+    // Remove the bomb immediately when it explodes
     World.remove(engine.world, bomb);
-  }, 8000);
+  }, 3000);
 
   setBombsLeft(prev => prev - 1);
   setGameStarted(true);
