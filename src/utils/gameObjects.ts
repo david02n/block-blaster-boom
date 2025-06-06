@@ -1,27 +1,28 @@
+
 import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
-  // Create segmented ground with gaps
-  const groundY = canvasHeight - 20; // Moved closer to bottom for better visual
-  const groundHeight = 40; // Reduced height for cleaner look
+  // Create segmented ground with gaps - positioned at the very bottom
+  const groundY = canvasHeight - 10; // Moved even closer to bottom
+  const groundHeight = 20; // Thinner ground for cleaner look
   const grounds = [];
   
-  // Left ground segment (under catapult area) - extended for better catapult support
-  const leftGroundWidth = canvasWidth * 0.4; // Increased from 35% to 40%
+  // Left ground segment (under catapult area)
+  const leftGroundWidth = canvasWidth * 0.45; // Extended to 45%
   const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
     render: {
-      fillStyle: 'transparent',
-      strokeStyle: 'transparent',
-      lineWidth: 0,
+      fillStyle: '#8B4513', // Brown color to make it visible
+      strokeStyle: '#654321',
+      lineWidth: 1,
     },
   });
   grounds.push(leftGround);
   
   // Right ground segment (under building area) 
-  const rightGroundStart = canvasWidth * 0.55; // Moved back to 55% for better gap
-  const rightGroundWidth = canvasWidth * 0.45; // Adjusted to 45%
+  const rightGroundStart = canvasWidth * 0.60; // Start at 60% for clear gap
+  const rightGroundWidth = canvasWidth * 0.40; // 40% width
   const rightGround = Bodies.rectangle(
     rightGroundStart + rightGroundWidth / 2, 
     groundY, 
@@ -31,9 +32,9 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
       isStatic: true,
       label: 'ground',
       render: {
-        fillStyle: 'transparent',
-        strokeStyle: 'transparent',
-        lineWidth: 0,
+        fillStyle: '#8B4513', // Brown color to make it visible
+        strokeStyle: '#654321',
+        lineWidth: 1,
       },
     }
   );
@@ -43,26 +44,28 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
 };
 
 export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
-  // Position catapult properly on the ground level
-  const x = canvasWidth * 0.15; // Back to 15% for better positioning
-  const y = canvasHeight - 100; // Positioned to sit properly on ground
+  // Position catapult properly on the left ground segment
+  const x = canvasWidth * 0.2; // 20% from left - well within the left ground segment
+  const groundLevel = canvasHeight - 10; // Match the ground level
+  const catapultHeight = 60; // Half the sprite height for proper positioning
+  const y = groundLevel - catapultHeight; // Position so bottom sits on ground
   
-  return Bodies.rectangle(x, y, 120, 120, { // Slightly smaller for better proportions
+  return Bodies.rectangle(x, y, 120, 120, {
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#8B4513', // Fallback brown color if sprite fails
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
-        xScale: 0.6,  // Adjusted for better fit
-        yScale: 0.6,  // Adjusted for better fit
+        xScale: 0.6,
+        yScale: 0.6,
       }
     },
   });
 };
 
 export const createBomb = (x: number, y: number) => {
-  return Bodies.circle(x, y, 30, { // Doubled radius from 15 to 30
+  return Bodies.circle(x, y, 30, {
     label: 'bomb',
     restitution: 0.3,
     friction: 0.4,
@@ -71,8 +74,8 @@ export const createBomb = (x: number, y: number) => {
       fillStyle: '#FF0000', // Fallback red color if sprite fails
       sprite: {
         texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
-        xScale: 0.16, // Doubled from 0.08 to 0.16
-        yScale: 0.16, // Doubled from 0.08 to 0.16
+        xScale: 0.16,
+        yScale: 0.16,
       }
     },
   });
@@ -87,11 +90,14 @@ export const createLargeTower = (x: number, groundY: number) => {
   const width = 12;
   const height = 20;
 
+  // Calculate the actual ground surface level
+  const actualGroundLevel = groundY + 10; // Since ground body is at groundY but extends up/down
+
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // Properly position blocks to sit on the ground
-      const blockY = groundY - 40 - row * blockHeight - blockHeight / 2; // Adjusted to sit on ground
+      // Position blocks to sit directly on the ground surface
+      const blockY = actualGroundLevel - (row * blockHeight) - (blockHeight / 2);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
@@ -105,7 +111,7 @@ export const createLargeTower = (x: number, groundY: number) => {
         },
       });
 
-      // Add hit tracking to each block - increased from 2 to 4 hits
+      // Add hit tracking to each block
       (block as any).hitCount = 0;
       (block as any).maxHits = 4;
 

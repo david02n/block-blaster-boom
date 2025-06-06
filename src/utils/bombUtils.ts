@@ -33,9 +33,9 @@ export const fireBomb = (
   const canvasWidth = renderRef.current.canvas.width;
   const canvasHeight = renderRef.current.canvas.height;
   
-  // Position bomb at catapult location (15% from left, above catapult)
-  const bombX = canvasWidth * 0.15;
-  const bombY = canvasHeight - 150; // Positioned above the catapult
+  // Position bomb at catapult location (20% from left, above catapult)
+  const bombX = canvasWidth * 0.2; // Match catapult X position
+  const bombY = canvasHeight - 120; // Positioned above the catapult
   
   const bomb = createBomb(bombX, bombY);
   
