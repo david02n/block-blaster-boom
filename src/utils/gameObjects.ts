@@ -13,17 +13,17 @@ export const createGround = () => {
 };
 
 export const createCatapult = () => {
-  // Position the catapult at bottom left corner with larger size
-  // Adjusted Y position to account for image height and anchor to ground
-  return Bodies.rectangle(120, 500, 240, 240, {
+  // Position the catapult at bottom left corner with much larger scale
+  // Adjusted Y position and size to make the White House image clearly visible
+  return Bodies.rectangle(150, 480, 300, 300, {
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#F5F5DC', // Fallback beige color if sprite fails
       sprite: {
         texture: '/lovable-uploads/1038e1d1-b630-4ea0-bee0-1e9ad521ddab.png',
-        xScale: 0.8,  // Increased from 0.3 to 0.8
-        yScale: 0.8,  // Increased from 0.3 to 0.8
+        xScale: 2.0,  // Significantly increased from 0.8 to 2.0
+        yScale: 2.0,  // Significantly increased from 0.8 to 2.0
       }
     },
   });
