@@ -2,7 +2,6 @@
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { audioManager } from './audioUtils';
-import { applyExplosionDamage } from './collisionHandler';
 import { toast } from 'sonner';
 
 export const fireBomb = (
@@ -60,7 +59,7 @@ export const fireBomb = (
   // Explode bomb after 3 seconds
   setTimeout(() => {
     console.log('Bomb exploding at position:', bomb.position);
-    explodeBomb(engine, bomb, renderRef);
+    explodeBomb(engine, bomb);
     // Remove the bomb immediately when it explodes
     World.remove(engine.world, bomb);
   }, 3000);
@@ -71,67 +70,16 @@ export const fireBomb = (
   toast(`Bomb fired! ${bombsLeft - 1} bombs remaining`);
 };
 
-const explodeBomb = (engine: Engine, bomb: Body, renderRef: React.RefObject<any>) => {
-  const explosionRadius = 150;
-  const explosionForce = 20;
-  const explosionEffects: Body[] = [];
+const explodeBomb = (engine: Engine, bomb: Body) => {
+  const explosionRadius = 120; // Larger initial blast
+  const explosionForce = 25;
   
-  console.log('Creating explosion at:', bomb.position);
+  console.log('Creating bomb explosion at:', bomb.position);
   
-  // Create initial explosion effect
-  const explosionEffect = Bodies.circle(bomb.position.x, bomb.position.y, 5, {
-    isStatic: true,
-    isSensor: true,
-    label: 'explosion',
-    render: {
-      fillStyle: '#FF6600',
-      strokeStyle: '#FF0000',
-      lineWidth: 3,
-    },
-  });
+  // Create visual explosion effect
+  createBombExplosionEffect(engine, bomb.position.x, bomb.position.y, explosionRadius);
   
-  World.add(engine.world, explosionEffect);
-  explosionEffects.push(explosionEffect);
-  
-  // Animate explosion expansion
-  let currentRadius = 5;
-  const maxRadius = explosionRadius;
-  const expansionRate = 15;
-  
-  const expandExplosion = () => {
-    if (currentRadius < maxRadius) {
-      currentRadius += expansionRate;
-      
-      // Create new larger explosion effect
-      const newExplosion = Bodies.circle(bomb.position.x, bomb.position.y, currentRadius, {
-        isStatic: true,
-        isSensor: true,
-        label: 'explosion',
-        render: {
-          fillStyle: `rgba(255, 102, 0, ${1 - (currentRadius / maxRadius) * 0.8})`,
-          strokeStyle: '#FF0000',
-          lineWidth: 2,
-        },
-      });
-      
-      World.add(engine.world, newExplosion);
-      explosionEffects.push(newExplosion);
-      
-      setTimeout(expandExplosion, 50);
-    } else {
-      // Clean up all explosion effects after expansion is complete
-      setTimeout(() => {
-        console.log('Cleaning up explosion effects');
-        explosionEffects.forEach(effect => {
-          World.remove(engine.world, effect);
-        });
-      }, 500);
-    }
-  };
-  
-  expandExplosion();
-  
-  // Apply explosion force and damage to blocks
+  // Apply explosion force to all blocks in range
   engine.world.bodies.forEach((body) => {
     if (body.label === 'block' && !body.isStatic) {
       const distance = Math.sqrt(
@@ -144,12 +92,81 @@ const explodeBomb = (engine: Engine, bomb: Body, renderRef: React.RefObject<any>
         const forceX = (body.position.x - bomb.position.x) / distance * explosionForce;
         const forceY = (body.position.y - bomb.position.y) / distance * explosionForce;
         Body.applyForce(body, body.position, { x: forceX, y: forceY });
-        console.log('Explosion force applied to block:', body.id);
+        console.log('Bomb explosion force applied to block:', body.id);
         
-        // Apply explosion damage using the collision system
-        // We need to pass the required functions - this will be handled in the Game component
-        (body as any).needsExplosionDamage = true;
+        // The collision detection system will handle the hit counting and potential cascading
       }
     }
   });
+};
+
+// Create visual explosion effect for bombs
+const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadius: number) => {
+  const explosionEffects: Body[] = [];
+  
+  // Create multiple explosion rings for dramatic effect
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      const explosionEffect = Body.create({
+        position: { x, y },
+        render: {
+          fillStyle: i === 0 ? '#FFFF00' : '#FF6600', // Yellow center, orange outer
+          strokeStyle: '#FF0000',
+          lineWidth: 2,
+        },
+        isStatic: true,
+        isSensor: true,
+        label: 'explosion',
+      });
+      
+      // Make it a circle shape
+      const initialRadius = 10 + i * 5;
+      Body.setVertices(explosionEffect, [
+        { x: x - initialRadius, y: y - initialRadius },
+        { x: x + initialRadius, y: y - initialRadius },
+        { x: x + initialRadius, y: y + initialRadius },
+        { x: x - initialRadius, y: y + initialRadius }
+      ]);
+      
+      World.add(engine.world, explosionEffect);
+      explosionEffects.push(explosionEffect);
+      
+      // Animate this ring
+      let currentRadius = initialRadius;
+      const targetRadius = maxRadius - i * 20;
+      const expansionRate = 15;
+      
+      const expandRing = () => {
+        if (currentRadius < targetRadius) {
+          currentRadius += expansionRate;
+          
+          const newVertices = [
+            { x: x - currentRadius, y: y - currentRadius },
+            { x: x + currentRadius, y: y - currentRadius },
+            { x: x + currentRadius, y: y + currentRadius },
+            { x: x - currentRadius, y: y + currentRadius }
+          ];
+          
+          Body.setVertices(explosionEffect, newVertices);
+          
+          // Fade the explosion
+          const opacity = Math.max(0.1, 1 - (currentRadius / targetRadius) * 0.9);
+          explosionEffect.render.fillStyle = i === 0 ? 
+            `rgba(255, 255, 0, ${opacity})` : 
+            `rgba(255, 102, 0, ${opacity})`;
+          
+          setTimeout(expandRing, 40);
+        }
+      };
+      
+      expandRing();
+    }, i * 100); // Stagger the rings
+  }
+  
+  // Clean up all explosion effects
+  setTimeout(() => {
+    explosionEffects.forEach(effect => {
+      World.remove(engine.world, effect);
+    });
+  }, 2000);
 };
