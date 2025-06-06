@@ -24,7 +24,7 @@ export class AudioManager {
 
   private async loadCustomSound() {
     // Load the custom sound file from the provided URL
-    await this.loadAudio('https://jumpshare.com/s/KOk2Jn3IIlrHZF6oHOSq', 'trump-china');
+    await this.loadAudio('https://jumpshare.com/s/KOk2Jn3IIlrHZF6oHOSq', 'trump-tariff');
   }
 
   async loadAudio(url: string, name: string): Promise<void> {
@@ -68,28 +68,28 @@ export class AudioManager {
     }
   }
 
-  // Play the custom Trump China sound
-  async playTrumpChina(): Promise<void> {
+  // Play the custom Trump tariff sound
+  async playTrumpTariff(): Promise<void> {
     try {
       await this.initAudioContext();
       
       // Try to play the loaded custom audio first
-      if (this.audioBuffers.has('trump-china')) {
-        await this.playSound('trump-china', 0.7);
+      if (this.audioBuffers.has('trump-tariff')) {
+        await this.playSound('trump-tariff', 0.7);
         return;
       }
 
       // Fallback: Use speech synthesis if custom audio fails to load
       if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance('China');
+        const utterance = new SpeechSynthesisUtterance('Tariff');
         utterance.rate = 0.8;
         utterance.pitch = 0.8;
         utterance.volume = 0.7;
         speechSynthesis.speak(utterance);
-        console.log('Playing speech synthesis fallback: China');
+        console.log('Playing speech synthesis fallback: Tariff');
       }
     } catch (error) {
-      console.error('Failed to play Trump China sound:', error);
+      console.error('Failed to play Trump tariff sound:', error);
     }
   }
 }

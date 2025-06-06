@@ -20,8 +20,8 @@ export const fireBomb = (
 
   console.log('Firing bomb with:', { power, angle, bombsLeft });
 
-  // Play Trump "China" sound effect
-  audioManager.playTrumpChina();
+  // Play Trump "Tariff" sound effect
+  audioManager.playTrumpTariff();
 
   const radianAngle = (angle * Math.PI) / 180;
   

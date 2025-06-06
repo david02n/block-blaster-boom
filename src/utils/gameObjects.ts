@@ -1,3 +1,4 @@
+
 import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -19,9 +20,9 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
   });
   grounds.push(leftGround);
   
-  // Right ground segment (under building area)
-  const rightGroundStart = canvasWidth * 0.55; // Start at 55% of screen width
-  const rightGroundWidth = canvasWidth * 0.45; // 45% of screen width
+  // Right ground segment (under building area) - moved to start earlier to support buildings
+  const rightGroundStart = canvasWidth * 0.5; // Start at 50% instead of 55%
+  const rightGroundWidth = canvasWidth * 0.5; // 50% of screen width
   const rightGround = Bodies.rectangle(
     rightGroundStart + rightGroundWidth / 2, 
     groundY, 
