@@ -1,7 +1,8 @@
+
 import { Bodies } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
-  return Bodies.rectangle(canvasWidth / 2, canvasHeight - 40, canvasWidth, 80, {
+  return Bodies.rectangle(canvasWidth / 2, canvasHeight + 40, canvasWidth, 80, {
     isStatic: true,
     label: 'ground',
     render: {
