@@ -1,13 +1,10 @@
-
 import { Events, Engine, Body, World, Bodies } from 'matter-js';
-import { scaleValue } from './scalingUtils';
 
 export const setupCollisionDetection = (
   engine: Engine,
   destroyedBlocksRef: React.MutableRefObject<Set<Body>>,
   setBlocksDestroyed: (value: React.SetStateAction<number>) => void,
-  setScore: (value: React.SetStateAction<number>) => void,
-  scale: number = 1
+  setScore: (value: React.SetStateAction<number>) => void
 ) => {
   Events.on(engine, 'collisionStart', (event) => {
     event.pairs.forEach((pair) => {
@@ -30,7 +27,7 @@ export const setupCollisionDetection = (
           // Check if block should explode (increased from 4 to 8 hits for direct bomb hits)
           if ((block as any).hitCount >= 8) {
             console.log('Block exploding after', (block as any).hitCount, 'hits');
-            explodeBlock(engine, block, destroyedBlocksRef, setBlocksDestroyed, setScore, scale);
+            explodeBlock(engine, block, destroyedBlocksRef, setBlocksDestroyed, setScore);
           } else {
             // Block hit but not destroyed - change appearance to show damage
             block.render.fillStyle = darkenColor(block.render.fillStyle as string);
@@ -42,11 +39,7 @@ export const setupCollisionDetection = (
     });
   });
 
-  // DISABLED boundary checking that was causing blocks to disappear
-  // The boundary checking was incorrectly removing blocks that were just settling
-  console.log('Boundary checking DISABLED to prevent block disappearing');
-  
-  // Only check for blocks that are EXTREMELY far off screen (like really, really far)
+  // Check for blocks falling off the island (screen boundaries)
   const checkBoundaries = () => {
     const canvasWidth = engine.render?.canvas?.width || 1920;
     const canvasHeight = engine.render?.canvas?.height || 1080;
@@ -55,61 +48,33 @@ export const setupCollisionDetection = (
     
     engine.world.bodies.forEach((body) => {
       if (body.label === 'block' && !destroyedBlocksRef.current.has(body)) {
-        // EXTREMELY conservative boundaries - only remove blocks that are ridiculously far away
-        const extremeMarginX = canvasWidth * 3; // 3x canvas width margin
-        const extremeMarginY = canvasHeight * 2; // 2x canvas height margin below ground
-        
-        const isExtremelyFarLeft = body.position.x < -extremeMarginX;
-        const isExtremelyFarRight = body.position.x > canvasWidth + extremeMarginX;
-        const isExtremelyFarDown = body.position.y > canvasHeight + extremeMarginY;
-        
-        if (isExtremelyFarLeft || isExtremelyFarRight || isExtremelyFarDown) {
-          console.log('Block is EXTREMELY far off screen and will be removed:', { 
+        // Check if block fell off the sides or below the screen
+        if (body.position.x < -50 || 
+            body.position.x > canvasWidth + 50 || 
+            body.position.y > canvasHeight + 100) {
+          
+          console.log('Block fell off island:', { 
             id: body.id, 
             x: body.position.x, 
-            y: body.position.y,
-            canvasWidth,
-            canvasHeight,
-            extremeMarginX,
-            extremeMarginY,
-            isExtremelyFarLeft,
-            isExtremelyFarRight,
-            isExtremelyFarDown
+            y: body.position.y 
           });
           
           blocksToRemove.push(body);
           destroyedBlocksRef.current.add(body);
           setBlocksDestroyed(prev => prev + 1);
           setScore(prev => prev + 5); // Less points for blocks that just fall off
-        } else {
-          // Log block positions periodically to debug disappearing issue
-          if (Math.random() < 0.001) { // Very rare logging
-            console.log('Block position check:', {
-              id: body.id,
-              x: body.position.x,
-              y: body.position.y,
-              isDestroyed: destroyedBlocksRef.current.has(body)
-            });
-          }
         }
       }
     });
     
     // Remove fallen blocks from the world
     if (blocksToRemove.length > 0) {
-      console.log(`Removing ${blocksToRemove.length} blocks that were EXTREMELY far off screen`);
       World.remove(engine.world, blocksToRemove);
     }
   };
 
-  // Check boundaries MUCH less frequently to reduce impact
-  let frameCount = 0;
-  Events.on(engine, 'beforeUpdate', () => {
-    frameCount++;
-    if (frameCount % 1800 === 0) { // Check every 1800 frames (roughly every 30 seconds)
-      checkBoundaries();
-    }
-  });
+  // Check boundaries every frame
+  Events.on(engine, 'beforeUpdate', checkBoundaries);
 };
 
 // Function to explode a block and create a cascade effect
@@ -118,8 +83,7 @@ const explodeBlock = (
   block: Body,
   destroyedBlocksRef: React.MutableRefObject<Set<Body>>,
   setBlocksDestroyed: (value: React.SetStateAction<number>) => void,
-  setScore: (value: React.SetStateAction<number>) => void,
-  scale: number = 1
+  setScore: (value: React.SetStateAction<number>) => void
 ) => {
   // Mark this block as destroyed
   destroyedBlocksRef.current.add(block);
@@ -128,7 +92,7 @@ const explodeBlock = (
   
   console.log('Block exploding at position:', block.position);
   
-  const explosionRadius = scaleValue(80, scale); // Scaled explosion radius
+  const explosionRadius = 80; // Smaller radius for cascade effect
   const explosionForce = 15;
   
   // Create visual explosion effect
@@ -171,7 +135,7 @@ const explodeBlock = (
         if ((affectedBlock as any).hitCount >= 8) {
           console.log('Cascade explosion triggered for block:', affectedBlock.id);
           // Recursive explosion!
-          explodeBlock(engine, affectedBlock, destroyedBlocksRef, setBlocksDestroyed, setScore, scale);
+          explodeBlock(engine, affectedBlock, destroyedBlocksRef, setBlocksDestroyed, setScore);
         } else {
           // Just damage the block
           affectedBlock.render.fillStyle = darkenColor(affectedBlock.render.fillStyle as string);

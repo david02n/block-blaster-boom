@@ -1,8 +1,8 @@
+
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { audioManager } from './audioUtils';
 import { toast } from 'sonner';
-import { scaleValue } from './scalingUtils';
 
 export const fireBomb = (
   engine: Engine,
@@ -11,15 +11,14 @@ export const fireBomb = (
   angle: number,
   bombsLeft: number,
   setBombsLeft: (value: React.SetStateAction<number>) => void,
-  setGameStarted: (value: React.SetStateAction<boolean>) => void,
-  scale: number = 1
+  setGameStarted: (value: React.SetStateAction<boolean>) => void
 ) => {
   if (bombsLeft <= 0 || !renderRef.current) {
     console.log('Cannot fire bomb:', { engine: !!engine, bombsLeft, render: !!renderRef.current });
     return;
   }
 
-  console.log('Firing bomb with:', { power, angle, bombsLeft, scale });
+  console.log('Firing bomb with:', { power, angle, bombsLeft });
 
   // Play Trump "Tariff" sound effect
   audioManager.playTrumpTariff();
@@ -29,11 +28,11 @@ export const fireBomb = (
   
   console.log('Calculated force:', { radianAngle, force });
 
-  // Position bomb at the catapult location but higher up for proper launch - scaled
-  const bombX = scaleValue(240, scale); // Match catapult X position
-  const bombY = scaleValue(360, scale); // Position bomb higher above catapult for proper trajectory
+  // Position bomb at the catapult location but higher up for proper launch
+  const bombX = 240; // Match catapult X position
+  const bombY = 360; // Position bomb higher above catapult for proper trajectory
   
-  const bomb = createBomb(bombX, bombY, scale);
+  const bomb = createBomb(bombX, bombY);
   
   // Apply force based on angle and power - now supporting full 360 degrees
   const forceVector = {
@@ -54,7 +53,7 @@ export const fireBomb = (
   // Explode bomb after 3 seconds
   setTimeout(() => {
     console.log('Bomb exploding at position:', bomb.position);
-    explodeBomb(engine, bomb, scale);
+    explodeBomb(engine, bomb);
     World.remove(engine.world, bomb);
   }, 3000);
 
@@ -64,8 +63,8 @@ export const fireBomb = (
   toast(`Bomb fired! ${bombsLeft - 1} bombs remaining`);
 };
 
-const explodeBomb = (engine: Engine, bomb: Body, scale: number) => {
-  const explosionRadius = scaleValue(120, scale);
+const explodeBomb = (engine: Engine, bomb: Body) => {
+  const explosionRadius = 120;
   const explosionForce = 25;
   
   console.log('Creating bomb explosion at:', bomb.position);

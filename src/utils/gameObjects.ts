@@ -1,34 +1,15 @@
-import { Bodies, Body, Engine } from 'matter-js';
-import { scaleValue, scalePosition } from './scalingUtils';
 
-export const createGround = (canvasWidth: number, canvasHeight: number, scale: number, groundTopY: number) => {
-  // Create continuous ground without gaps - positioned at groundTopY
-  const groundHeight = scaleValue(40, scale); // Increased thickness for stability
-  const groundCenterY = groundTopY + (groundHeight / 2);
+import { Bodies, Body } from 'matter-js';
+
+export const createGround = (canvasWidth: number, canvasHeight: number) => {
+  // Create segmented ground with gaps - positioned at the very bottom
+  const groundY = canvasHeight - 10;
+  const groundHeight = 20;
   const grounds = [];
   
-  // Create multiple overlapping ground segments to ensure NO GAPS
-  const segmentWidth = canvasWidth * 0.3; // Wider segments with overlap
-  const segments = Math.ceil(canvasWidth / (segmentWidth * 0.8)) + 2; // Extra segments with overlap
-  
-  for (let i = 0; i < segments; i++) {
-    const segmentX = (i * segmentWidth * 0.8) - (segmentWidth * 0.1); // Overlap segments
-    const ground = Bodies.rectangle(segmentX, groundCenterY, segmentWidth, groundHeight, {
-      isStatic: true,
-      label: 'ground',
-      render: {
-        fillStyle: '#8B4513',
-        strokeStyle: '#654321',
-        lineWidth: 1,
-      },
-    });
-    grounds.push(ground);
-  }
-  
-  // Add extra ground segments specifically under the tower area
-  const towerX = canvasWidth * 0.8;
-  const towerGroundWidth = canvasWidth * 0.4; // Wide coverage under tower
-  const towerGround = Bodies.rectangle(towerX, groundCenterY, towerGroundWidth, groundHeight, {
+  // Left ground segment (under catapult area) - fixed positioning
+  const leftGroundWidth = 540; // Fixed width instead of percentage
+  const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
     render: {
@@ -37,42 +18,54 @@ export const createGround = (canvasWidth: number, canvasHeight: number, scale: n
       lineWidth: 1,
     },
   });
-  grounds.push(towerGround);
+  grounds.push(leftGround);
   
-  console.log('Created overlapping ground segments:', {
-    segments: segments + 1,
-    groundCenterY: groundCenterY,
-    topY: groundTopY,
-    canvasWidth,
-    towerX,
-    towerGroundWidth
-  });
+  // Right ground segment (under building area) - fixed positioning
+  const rightGroundStart = 720; // Fixed position instead of percentage
+  const rightGroundWidth = 480; // Fixed width instead of percentage
+  const rightGround = Bodies.rectangle(
+    rightGroundStart + rightGroundWidth / 2, 
+    groundY, 
+    rightGroundWidth, 
+    groundHeight, 
+    {
+      isStatic: true,
+      label: 'ground',
+      render: {
+        fillStyle: '#8B4513',
+        strokeStyle: '#654321',
+        lineWidth: 1,
+      },
+    }
+  );
+  grounds.push(rightGround);
   
   return grounds;
 };
 
-export const createCatapult = (canvasWidth: number, canvasHeight: number, scale: number, groundTopY: number) => {
-  // Scaled position for catapult
-  const x = scaleValue(240, scale);
-  const catapultHeight = scaleValue(120, scale);
-  const y = groundTopY - (catapultHeight / 2);
+export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
+  // Fixed position for catapult
+  const x = 240; // Fixed position instead of percentage
+  const groundLevel = canvasHeight - 10;
+  const catapultHeight = 180; // Increased height again to position catapult even higher
+  const y = groundLevel - catapultHeight; // This will position the catapult much higher above ground
   
-  return Bodies.rectangle(x, y, scaleValue(120, scale), catapultHeight, {
+  return Bodies.rectangle(x, y, 120, 120, {
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#8B4513',
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
-        xScale: 0.6 * scale,
-        yScale: 0.6 * scale,
+        xScale: 0.6,
+        yScale: 0.6,
       }
     },
   });
 };
 
-export const createBomb = (x: number, y: number, scale: number) => {
-  return Bodies.circle(x, y, scaleValue(30, scale), {
+export const createBomb = (x: number, y: number) => {
+  return Bodies.circle(x, y, 30, {
     label: 'bomb',
     restitution: 0.3,
     friction: 0.4,
@@ -81,66 +74,43 @@ export const createBomb = (x: number, y: number, scale: number) => {
       fillStyle: '#FF0000',
       sprite: {
         texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
-        xScale: 0.16 * scale,
-        yScale: 0.16 * scale,
+        xScale: 0.16,
+        yScale: 0.16,
       }
     },
   });
 };
 
-export const createLargeTower = (x: number, groundTopY: number, scale: number, engine?: Engine) => {
+export const createLargeTower = (x: number, groundY: number) => {
   const blocks = [];
-  const blockWidth = scaleValue(30, scale);
-  const blockHeight = scaleValue(20, scale);
+  const blockWidth = 30;
+  const blockHeight = 20;
   
   // Create a tower - 12 blocks wide by 20 blocks high
   const width = 12;
   const height = 20;
 
-  console.log('Building tower with ground coverage:', {
-    groundTopY,
-    blockWidth,
-    blockHeight,
-    scale,
-    towerCenterX: x,
-    towerBottomY: groundTopY - (blockHeight / 2)
-  });
+  // Calculate the actual ground surface level
+  const actualGroundLevel = groundY + 10;
 
-  // Disable gravity completely during construction
-  const originalGravity = engine?.world.gravity.y;
-  if (engine) {
-    engine.world.gravity.y = 0;
-    console.log('Gravity disabled for tower construction');
-  }
-
-  // Build from bottom row (row 0) to top row (row height-1)
   for (let row = 0; row < height; row++) {
-    console.log(`Building row ${row} of ${height}`);
-    
     for (let col = 0; col < width; col++) {
-      const blockX = x + (col - (width - 1) / 2) * blockWidth;
-      
-      // Position blocks EXACTLY on the ground surface
-      // Bottom row sits directly on groundTopY
-      const blockY = groundTopY - (blockHeight / 2) - (row * blockHeight);
-
-      console.log(`Block row ${row}, col ${col}: X=${blockX}, Y=${blockY}, bottomEdge=${blockY + blockHeight/2}, groundTopY=${groundTopY}`);
+      const blockX = x + (col - width / 2) * blockWidth;
+      const blockY = actualGroundLevel - (row * blockHeight) - (blockHeight / 2);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
-        restitution: 0.1,
-        friction: 0.9,
-        density: 0.3,
+        restitution: 0.2,
+        friction: 0.7,
+        density: 0.6,
         render: {
           fillStyle: getChineseFlagBlockColor(row, col, width, height),
           strokeStyle: '#333',
           lineWidth: 1,
         },
-        // Start as static to prevent any movement during construction
-        isStatic: true,
       });
 
-      // Add hit tracking to each block
+      // Add hit tracking to each block - increased from 4 to 8 hits required
       (block as any).hitCount = 0;
       (block as any).maxHits = 8;
 
@@ -148,36 +118,12 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
     }
   }
 
-  // Add all blocks to world while static
-  if (engine) {
-    console.log(`Adding ${blocks.length} static blocks to world`);
-  }
-
-  // Restore physics after construction with increased wait time
-  if (engine && originalGravity !== undefined) {
-    setTimeout(() => {
-      console.log('Restoring gravity and making blocks dynamic');
-      engine.world.gravity.y = originalGravity;
-      
-      // Make blocks dynamic row by row from bottom to top with longer delays
-      for (let row = 0; row < height; row++) {
-        setTimeout(() => {
-          const rowBlocks = blocks.filter((_, index) => Math.floor(index / width) === row);
-          rowBlocks.forEach(block => {
-            Body.setStatic(block, false);
-          });
-          console.log(`Row ${row} blocks made dynamic`);
-        }, row * 100); // Increased delay between rows
-      }
-    }, 1000); // Increased initial wait time
-  }
-
   return blocks;
 };
 
 // Legacy function for backwards compatibility
-export const createBuilding = (x: number, groundY: number, width?: number, height?: number, scale: number = 1) => {
-  return createLargeTower(x, groundY, scale);
+export const createBuilding = (x: number, groundY: number, width?: number, height?: number) => {
+  return createLargeTower(x, groundY);
 };
 
 const getChineseFlagBlockColor = (row: number, col: number, width: number, height: number): string => {
