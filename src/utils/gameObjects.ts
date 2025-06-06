@@ -1,4 +1,3 @@
-
 import { Bodies } from 'matter-js';
 
 export const createGround = () => {
@@ -20,9 +19,9 @@ export const createCatapult = () => {
     render: {
       fillStyle: '#F5F5DC', // Fallback beige color if sprite fails
       sprite: {
-        texture: '/lovable-uploads/d235bf32-51a4-45f5-b40c-721e2e9522f2.png',
-        xScale: 0.15,
-        yScale: 0.15,
+        texture: '/lovable-uploads/1038e1d1-b630-4ea0-bee0-1e9ad521ddab.png',
+        xScale: 0.25,
+        yScale: 0.25,
       }
     },
   });

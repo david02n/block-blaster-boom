@@ -16,7 +16,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     engine.world.gravity.y = 0.8;
     engineRef.current = engine;
 
-    // Create renderer with grass-themed background
+    // Create renderer with cartoon blue sky background
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
@@ -24,7 +24,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
         width: 1000,
         height: 600,
         wireframes: false,
-        background: 'linear-gradient(180deg, #87CEEB 0%, #98E4D6 50%, #7CB342 100%)',
+        background: '#87CEEB', // Cartoon blue sky color
         showAngleIndicator: false,
         showVelocity: false,
       },
