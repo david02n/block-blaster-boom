@@ -1,3 +1,4 @@
+
 import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -47,15 +48,15 @@ export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
   const x = canvasWidth * 0.15; // 15% from left edge
   const y = canvasHeight - 120; // Just above the ground level
   
-  return Bodies.rectangle(x, y, 100, 100, {
+  return Bodies.rectangle(x, y, 150, 150, { // Increased from 100x100 to 150x150
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#8B4513', // Fallback brown color if sprite fails
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
-        xScale: 1.0,  // Doubled from 0.5 to 1.0
-        yScale: 1.0,  // Doubled from 0.5 to 1.0
+        xScale: 0.75,  // Adjusted from 1.0 to 0.75 to fit better in the larger physics body
+        yScale: 0.75,  // Adjusted from 1.0 to 0.75 to fit better in the larger physics body
       }
     },
   });
