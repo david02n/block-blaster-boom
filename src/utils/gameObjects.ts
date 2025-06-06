@@ -91,13 +91,15 @@ export const createLargeTower = (x: number, groundY: number, scale: number) => {
   const width = 12;
   const height = 20;
 
-  // The groundY parameter is the fixed ground level (50px from bottom)
-  // We need to position blocks so they sit ON TOP of this level
-  const groundSurfaceLevel = groundY;
+  // The groundY is the center of the ground body (50px from bottom)
+  // We need to calculate the actual ground surface (top of the ground)
+  const groundHeight = scaleValue(20, scale);
+  const groundSurface = groundY - (groundHeight / 2);
 
-  console.log('Creating tower at ground level:', {
+  console.log('Creating tower with corrected positioning:', {
     groundY,
-    groundSurfaceLevel,
+    groundHeight,
+    groundSurface,
     blockHeight,
     scale
   });
@@ -105,9 +107,9 @@ export const createLargeTower = (x: number, groundY: number, scale: number) => {
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // Position blocks above the ground surface, building upwards
-      // Start from the ground surface and build up
-      const blockY = groundSurfaceLevel - (row * blockHeight) - (blockHeight / 2);
+      // Position blocks starting from the ground surface, building upwards
+      // Each block sits on top of the previous row
+      const blockY = groundSurface - (row * blockHeight) - (blockHeight / 2);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
