@@ -79,10 +79,14 @@ export const createBomb = (x: number, y: number) => {
   });
 };
 
-export const createBuilding = (x: number, groundY: number, width: number, height: number) => {
+export const createLargeTower = (x: number, groundY: number) => {
   const blocks = [];
   const blockWidth = 30;
   const blockHeight = 20;
+  
+  // Create a much larger tower - 12 blocks wide by 20 blocks high
+  const width = 12;
+  const height = 20;
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
@@ -101,11 +105,20 @@ export const createBuilding = (x: number, groundY: number, width: number, height
         },
       });
 
+      // Add hit tracking to each block
+      (block as any).hitCount = 0;
+      (block as any).maxHits = 2;
+
       blocks.push(block);
     }
   }
 
   return blocks;
+};
+
+// Legacy function for backwards compatibility - now creates the large tower
+export const createBuilding = (x: number, groundY: number, width?: number, height?: number) => {
+  return createLargeTower(x, groundY);
 };
 
 const getChineseFlagBlockColor = (row: number, col: number, width: number, height: number): string => {

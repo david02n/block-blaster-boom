@@ -1,7 +1,7 @@
 
 import { useRef, useEffect } from 'react';
 import { Engine, Render, World, Runner, Mouse, MouseConstraint } from 'matter-js';
-import { createBuilding, createGround, createCatapult } from '../utils/gameObjects';
+import { createLargeTower, createGround, createCatapult } from '../utils/gameObjects';
 
 export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   const engineRef = useRef<Engine>();
@@ -58,11 +58,10 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);
 
-    // Position buildings on the actual ground level (bottom of screen where grass is)
+    // Position single large tower in the center-right of the screen
     const groundLevel = canvasHeight - 80; // Just above the actual ground physics body
-    const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10); // Main building - larger and central
-    const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);  // Side building
-    World.add(engine.world, [...building1, ...building2]);
+    const largeTower = createLargeTower(canvasWidth * 0.7, groundLevel); // Centered at 70% of screen width
+    World.add(engine.world, largeTower);
 
     // Add mouse control
     const mouse = Mouse.create(render.canvas);
@@ -99,9 +98,9 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const canvasHeight = renderRef.current.canvas.height;
     const groundLevel = canvasHeight - 80; // Match the actual ground level
 
-    const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10);
-    const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);
-    World.add(engineRef.current.world, [...building1, ...building2]);
+    // Create single large tower
+    const largeTower = createLargeTower(canvasWidth * 0.7, groundLevel);
+    World.add(engineRef.current.world, largeTower);
   };
 
   const removeBodiesExceptStatic = () => {

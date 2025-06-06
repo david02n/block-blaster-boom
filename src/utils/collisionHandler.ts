@@ -22,10 +22,22 @@ export const setupCollisionDetection = (
         if (!destroyedBlocksRef.current.has(block)) {
           console.log('Bomb hit block!', { block: block.id, bomb: bomb.id });
           
-          // Mark block for destruction using Set
-          destroyedBlocksRef.current.add(block);
-          setBlocksDestroyed(prev => prev + 1);
-          setScore(prev => prev + 10);
+          // Increment hit count
+          (block as any).hitCount = ((block as any).hitCount || 0) + 1;
+          
+          // Check if block should be destroyed
+          if ((block as any).hitCount >= (block as any).maxHits) {
+            // Mark block for destruction using Set
+            destroyedBlocksRef.current.add(block);
+            setBlocksDestroyed(prev => prev + 1);
+            setScore(prev => prev + 10);
+            console.log('Block destroyed after', (block as any).hitCount, 'hits');
+          } else {
+            // Block hit but not destroyed - change appearance to show damage
+            block.render.fillStyle = darkenColor(block.render.fillStyle as string);
+            console.log('Block damaged, hits:', (block as any).hitCount);
+            setScore(prev => prev + 2); // Small score for hitting but not destroying
+          }
         }
       }
     });
@@ -68,4 +80,39 @@ export const setupCollisionDetection = (
 
   // Check boundaries every frame
   Events.on(engine, 'beforeUpdate', checkBoundaries);
+};
+
+// Helper function to darken a color to show damage
+const darkenColor = (color: string): string => {
+  // Simple darkening by reducing brightness
+  if (color === '#DE2910') return '#B01F0A'; // Darker red
+  if (color === '#FFDE00') return '#CCA500'; // Darker yellow
+  return color;
+};
+
+// Function to handle explosion damage to blocks
+export const applyExplosionDamage = (
+  block: Body,
+  destroyedBlocksRef: React.MutableRefObject<Set<Body>>,
+  setBlocksDestroyed: (value: React.SetStateAction<number>) => void,
+  setScore: (value: React.SetStateAction<number>) => void
+) => {
+  if (destroyedBlocksRef.current.has(block)) return;
+  
+  // Increment hit count for explosion damage
+  (block as any).hitCount = ((block as any).hitCount || 0) + 1;
+  
+  // Check if block should be destroyed
+  if ((block as any).hitCount >= (block as any).maxHits) {
+    // Mark block for destruction
+    destroyedBlocksRef.current.add(block);
+    setBlocksDestroyed(prev => prev + 1);
+    setScore(prev => prev + 10);
+    console.log('Block destroyed by explosion after', (block as any).hitCount, 'hits');
+  } else {
+    // Block hit but not destroyed - change appearance to show damage
+    block.render.fillStyle = darkenColor(block.render.fillStyle as string);
+    console.log('Block damaged by explosion, hits:', (block as any).hitCount);
+    setScore(prev => prev + 2); // Small score for hitting but not destroying
+  }
 };

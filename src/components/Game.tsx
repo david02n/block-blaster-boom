@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { GameUI } from './GameUI';
 import { useGameState } from '../hooks/useGameState';
 import { usePhysicsEngine } from '../hooks/usePhysicsEngine';
-import { setupCollisionDetection } from '../utils/collisionHandler';
+import { setupCollisionDetection, applyExplosionDamage } from '../utils/collisionHandler';
 import { fireBomb } from '../utils/bombUtils';
 import { toast } from 'sonner';
 
@@ -22,6 +22,30 @@ export const Game = () => {
       gameState.setBlocksDestroyed,
       gameState.setScore
     );
+
+    // Handle explosion damage
+    const handleExplosionDamage = () => {
+      if (!engineRef.current) return;
+      
+      engineRef.current.world.bodies.forEach((body) => {
+        if (body.label === 'block' && (body as any).needsExplosionDamage) {
+          applyExplosionDamage(
+            body,
+            gameState.destroyedBlocksRef,
+            gameState.setBlocksDestroyed,
+            gameState.setScore
+          );
+          (body as any).needsExplosionDamage = false; // Reset flag
+        }
+      });
+    };
+
+    // Check for explosion damage every frame
+    const explosionInterval = setInterval(handleExplosionDamage, 50);
+
+    return () => {
+      clearInterval(explosionInterval);
+    };
   }, [engineRef.current, gameState]);
 
   const handleFireBomb = () => {

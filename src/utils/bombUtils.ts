@@ -2,6 +2,7 @@
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { audioManager } from './audioUtils';
+import { applyExplosionDamage } from './collisionHandler';
 import { toast } from 'sonner';
 
 export const fireBomb = (
@@ -59,7 +60,7 @@ export const fireBomb = (
   // Explode bomb after 3 seconds
   setTimeout(() => {
     console.log('Bomb exploding at position:', bomb.position);
-    explodeBomb(engine, bomb);
+    explodeBomb(engine, bomb, renderRef);
     // Remove the bomb immediately when it explodes
     World.remove(engine.world, bomb);
   }, 3000);
@@ -70,7 +71,7 @@ export const fireBomb = (
   toast(`Bomb fired! ${bombsLeft - 1} bombs remaining`);
 };
 
-const explodeBomb = (engine: Engine, bomb: Body) => {
+const explodeBomb = (engine: Engine, bomb: Body, renderRef: React.RefObject<any>) => {
   const explosionRadius = 150;
   const explosionForce = 20;
   const explosionEffects: Body[] = [];
@@ -130,7 +131,7 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
   
   expandExplosion();
   
-  // Apply explosion force to blocks
+  // Apply explosion force and damage to blocks
   engine.world.bodies.forEach((body) => {
     if (body.label === 'block' && !body.isStatic) {
       const distance = Math.sqrt(
@@ -144,6 +145,10 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
         const forceY = (body.position.y - bomb.position.y) / distance * explosionForce;
         Body.applyForce(body, body.position, { x: forceX, y: forceY });
         console.log('Explosion force applied to block:', body.id);
+        
+        // Apply explosion damage using the collision system
+        // We need to pass the required functions - this will be handled in the Game component
+        (body as any).needsExplosionDamage = true;
       }
     }
   });
