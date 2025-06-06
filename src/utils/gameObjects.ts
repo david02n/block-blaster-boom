@@ -1,3 +1,4 @@
+
 import { Bodies, Body, Engine } from 'matter-js';
 import { scaleValue, scalePosition } from './scalingUtils';
 
@@ -89,11 +90,11 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
   const width = 12;
   const height = 20;
 
-  console.log('Creating tower positioned directly on ground:', {
+  console.log('Creating tower with bottom edge on ground surface:', {
     groundTopY,
     blockHeight,
     scale,
-    firstBlockY: groundTopY - (blockHeight / 2) // Bottom blocks centered on ground surface
+    firstBlockY: groundTopY - blockHeight // Bottom edge of bottom blocks at ground surface
   });
 
   // Temporarily reduce gravity during tower creation if engine is provided
@@ -105,8 +106,9 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // Position blocks so bottom row sits directly on ground surface
-      // Bottom row (row 0) has its center at groundTopY - (blockHeight / 2)
+      // Position blocks so bottom edge of bottom row sits exactly on ground surface
+      // Bottom row (row 0) center is at groundTopY - (blockHeight / 2)
+      // Each subsequent row is positioned one blockHeight higher
       const blockY = groundTopY - (blockHeight / 2) - (row * blockHeight);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
