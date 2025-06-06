@@ -58,11 +58,14 @@ export const GameUI: React.FC<GameUIProps> = ({
             <Slider
               value={[angle]}
               onValueChange={(value) => setAngle(value[0])}
-              max={-10}
-              min={-80}
+              max={360}
+              min={0}
               step={5}
               className="w-full"
             />
+            <div className="text-xs text-gray-500 text-center">
+              0° = Right | 90° = Up | 180° = Left | 270° = Down
+            </div>
           </div>
 
           <div className="space-y-3">

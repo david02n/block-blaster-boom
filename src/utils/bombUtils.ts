@@ -1,3 +1,4 @@
+
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { audioManager } from './audioUtils';
@@ -27,16 +28,16 @@ export const fireBomb = (
   
   console.log('Calculated force:', { radianAngle, force });
 
-  // Use fixed positioning for bomb launch
-  const bombX = 240; // Match fixed catapult position
-  const bombY = 480; // Fixed position above catapult
+  // Position bomb at the catapult location but higher up for proper launch
+  const bombX = 240; // Match catapult X position
+  const bombY = 360; // Position bomb higher above catapult for proper trajectory
   
   const bomb = createBomb(bombX, bombY);
   
-  // Apply force based on angle and power
+  // Apply force based on angle and power - now supporting full 360 degrees
   const forceVector = {
     x: Math.cos(radianAngle) * force,
-    y: Math.sin(radianAngle) * force,
+    y: -Math.sin(radianAngle) * force, // Negative Y for upward launch
   };
   
   console.log('Applying force vector:', forceVector);

@@ -5,7 +5,7 @@ import { Body } from 'matter-js';
 export const useGameState = () => {
   const destroyedBlocksRef = useRef<Set<Body>>(new Set());
   const [power, setPower] = useState(50);
-  const [angle, setAngle] = useState(-45);
+  const [angle, setAngle] = useState(45); // Changed to 45 degrees (upward angle)
   const [score, setScore] = useState(0);
   const [blocksDestroyed, setBlocksDestroyed] = useState(0);
   const [bombsLeft, setBombsLeft] = useState(5);
