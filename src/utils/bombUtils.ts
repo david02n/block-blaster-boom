@@ -1,3 +1,4 @@
+
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { toast } from 'sonner';
@@ -24,7 +25,8 @@ export const fireBomb = (
   
   console.log('Calculated force:', { radianAngle, force });
 
-  const bomb = createBomb(150, 450);
+  // Adjusted position to match the new catapult position
+  const bomb = createBomb(120, 380);
   
   // Apply force based on angle and power
   const forceVector = {
