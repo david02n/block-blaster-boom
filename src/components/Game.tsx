@@ -41,8 +41,13 @@ export const Game = () => {
   const handleResetGame = () => {
     if (!engineRef.current) return;
 
+    // Clear all bodies except ground and catapult
     removeBodiesExceptStatic();
+
+    // Reset game state
     gameState.resetGameState();
+
+    // Recreate buildings
     recreateBuildings();
 
     toast('Game reset! Ready for destruction!');
@@ -51,14 +56,13 @@ export const Game = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-200 to-sky-50 flex flex-col">
       <div className="flex-1 flex">
-        <div className="flex-1 relative flex items-center justify-center">
+        <div className="flex-1 relative">
           <div 
             ref={sceneRef} 
-            className="border-2 border-gray-300 rounded-lg shadow-lg"
+            className="w-full h-full border-2 border-gray-300 rounded-lg shadow-lg"
             style={{ 
-              width: '1200px',
-              height: '600px',
-              backgroundImage: 'url(/lovable-uploads/3a7cfa90-8bf5-4297-9b29-4a235240b8f7.png)',
+              height: 'calc(100vh - 2rem)',
+              backgroundImage: 'url(/lovable-uploads/background.png)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
