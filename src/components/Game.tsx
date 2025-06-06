@@ -58,7 +58,7 @@ export const Game = () => {
             style={{ 
               width: '1200px',
               height: '600px',
-              backgroundImage: 'url(/lovable-uploads/9696d09a-d14c-4385-8c78-3bff0530ba54.png)',
+              backgroundImage: 'url(/lovable-uploads/3a7cfa90-8bf5-4297-9b29-4a235240b8f7.png)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
