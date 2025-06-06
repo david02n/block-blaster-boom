@@ -56,12 +56,13 @@ export const Game = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-200 to-sky-50 flex flex-col">
       <div className="flex-1 flex">
-        <div className="flex-1 relative">
+        <div className="flex-1 flex justify-center items-center p-4">
           <div 
             ref={sceneRef} 
-            className="w-full h-full border-2 border-gray-300 rounded-lg shadow-lg"
+            className="border-2 border-gray-300 rounded-lg shadow-lg"
             style={{ 
-              height: 'calc(100vh - 2rem)',
+              width: '1200px',
+              height: '600px',
               backgroundImage: 'url(/lovable-uploads/background.png)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
