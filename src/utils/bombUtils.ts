@@ -25,8 +25,8 @@ export const fireBomb = (
 
   const radianAngle = (angle * Math.PI) / 180;
   
-  // Maximum force for ultimate power
-  const force = power / 1;
+  // Increased force significantly to compensate for larger bomb size
+  const force = power * 2; // Doubled the force multiplier from /1 to *2
   
   console.log('Calculated force:', { radianAngle, force });
 
@@ -40,7 +40,7 @@ export const fireBomb = (
   
   const bomb = createBomb(bombX, bombY);
   
-  // Apply force based on angle and power
+  // Apply force based on angle and power with increased multiplier
   const forceVector = {
     x: Math.cos(radianAngle) * force,
     y: Math.sin(radianAngle) * force,
