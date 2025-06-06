@@ -13,15 +13,15 @@ export const createGround = () => {
 };
 
 export const createCatapult = () => {
-  return Bodies.rectangle(100, 480, 200, 200, {
+  return Bodies.rectangle(150, 400, 300, 300, {
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#F5F5DC', // Fallback beige color if sprite fails
       sprite: {
         texture: '/lovable-uploads/9cfd24cd-98ca-41dc-9bf8-9495bed975b2.png',
-        xScale: 0.8,
-        yScale: 0.8,
+        xScale: 0.3,
+        yScale: 0.3,
       }
     },
   });
