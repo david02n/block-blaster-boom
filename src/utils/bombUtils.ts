@@ -25,8 +25,8 @@ export const fireBomb = (
   
   console.log('Calculated force:', { radianAngle, force });
 
-  // Adjusted position to match the new catapult position
-  const bomb = createBomb(120, 380);
+  // Adjusted position to match the centered catapult position
+  const bomb = createBomb(960, 600);
   
   // Apply force based on angle and power
   const forceVector = {

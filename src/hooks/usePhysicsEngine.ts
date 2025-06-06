@@ -16,13 +16,13 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     engine.world.gravity.y = 0.8;
     engineRef.current = engine;
 
-    // Create renderer with cartoon blue sky background
+    // Create renderer with new 1920x1080 dimensions
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
       options: {
-        width: 1000,
-        height: 600,
+        width: 1920,
+        height: 1080,
         wireframes: false,
         background: '#87CEEB', // Cartoon blue sky color
         showAngleIndicator: false,
@@ -35,15 +35,15 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const runner = Runner.create();
     runnerRef.current = runner;
 
-    // Create world objects
+    // Create world objects with adjusted positions for new screen size
     const ground = createGround();
     World.add(engine.world, ground);
 
     const catapult = createCatapult();
     World.add(engine.world, catapult);
 
-    const building1 = createBuilding(700, 500, 4, 8);
-    const building2 = createBuilding(850, 500, 3, 6);
+    const building1 = createBuilding(1400, 900, 4, 8);
+    const building2 = createBuilding(1650, 900, 3, 6);
     World.add(engine.world, [...building1, ...building2]);
 
     // Add mouse control
@@ -77,8 +77,8 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   const recreateBuildings = () => {
     if (!engineRef.current) return;
 
-    const building1 = createBuilding(700, 500, 4, 8);
-    const building2 = createBuilding(850, 500, 3, 6);
+    const building1 = createBuilding(1400, 900, 4, 8);
+    const building2 = createBuilding(1650, 900, 3, 6);
     World.add(engineRef.current.world, [...building1, ...building2]);
   };
 
