@@ -1,4 +1,3 @@
-
 import { Bodies } from 'matter-js';
 
 export const createGround = () => {
@@ -22,15 +21,17 @@ export const createCatapult = () => {
 };
 
 export const createBomb = (x: number, y: number) => {
-  return Bodies.circle(x, y, 12, {
+  return Bodies.circle(x, y, 20, {
     label: 'bomb',
     restitution: 0.3,
     friction: 0.4,
-    density: 0.8,
+    density: 1.5, // Increased density for more impact
     render: {
-      fillStyle: '#FF0000',
-      strokeStyle: '#8B0000',
-      lineWidth: 2,
+      sprite: {
+        texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
+        xScale: 0.08, // Scale down the image to fit the circle
+        yScale: 0.08,
+      }
     },
   });
 };
