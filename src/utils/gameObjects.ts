@@ -1,3 +1,4 @@
+
 import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -46,8 +47,8 @@ export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
   // Fixed position for catapult
   const x = 240; // Fixed position instead of percentage
   const groundLevel = canvasHeight - 10;
-  const catapultHeight = 120; // Increased height to position catapult higher
-  const y = groundLevel - catapultHeight; // This will position the catapult higher above ground
+  const catapultHeight = 180; // Increased height again to position catapult even higher
+  const y = groundLevel - catapultHeight; // This will position the catapult much higher above ground
   
   return Bodies.rectangle(x, y, 120, 120, {
     isStatic: true,
