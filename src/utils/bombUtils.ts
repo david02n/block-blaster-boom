@@ -63,7 +63,7 @@ export const fireBomb = (
 
 const explodeBomb = (engine: Engine, bomb: Body) => {
   const explosionRadius = 150;
-  const explosionForce = 0.05;
+  const explosionForce = 0.8; // Increased from 0.05 to 0.8 for much stronger blast
   
   console.log('Creating explosion at:', bomb.position);
   
@@ -129,6 +129,7 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
       );
       
       if (distance < explosionRadius) {
+        // Calculate force direction from explosion center to block
         const forceX = (body.position.x - bomb.position.x) / distance * explosionForce;
         const forceY = (body.position.y - bomb.position.y) / distance * explosionForce;
         Body.applyForce(body, body.position, { x: forceX, y: forceY });
