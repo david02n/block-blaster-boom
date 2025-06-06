@@ -1,4 +1,3 @@
-
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { toast } from 'sonner';
@@ -63,7 +62,7 @@ export const fireBomb = (
 
 const explodeBomb = (engine: Engine, bomb: Body) => {
   const explosionRadius = 150;
-  const explosionForce = 2; // Increased from 0.8 to 2 for even stronger blast
+  const explosionForce = 20; // Increased from 2 to 20 for extremely powerful blast
   
   console.log('Creating explosion at:', bomb.position);
   
