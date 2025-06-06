@@ -32,7 +32,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     engine.world.gravity.y = 0.8;
     engineRef.current = engine;
 
-    // Create renderer with responsive dimensions
+    // Create renderer with responsive dimensions and background image
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
@@ -40,7 +40,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
         width: canvasWidth,
         height: canvasHeight,
         wireframes: false,
-        background: '#87CEEB', // Cartoon blue sky color
+        background: 'transparent', // Make background transparent to show CSS background
         showAngleIndicator: false,
         showVelocity: false,
       },

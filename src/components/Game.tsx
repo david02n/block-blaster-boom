@@ -59,8 +59,14 @@ export const Game = () => {
         <div className="flex-1 relative">
           <div 
             ref={sceneRef} 
-            className="w-full h-full border-2 border-gray-300 rounded-lg shadow-lg bg-gradient-to-b from-sky-200 to-green-200"
-            style={{ height: 'calc(100vh - 2rem)' }}
+            className="w-full h-full border-2 border-gray-300 rounded-lg shadow-lg"
+            style={{ 
+              height: 'calc(100vh - 2rem)',
+              backgroundImage: 'url(/lovable-uploads/9696d09a-d14c-4385-8c78-3bff0530ba54.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
           />
           <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
             <div className="space-y-2 text-sm font-semibold">
