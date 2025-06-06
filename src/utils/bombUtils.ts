@@ -1,4 +1,3 @@
-
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { audioManager } from './audioUtils';
@@ -25,8 +24,8 @@ export const fireBomb = (
 
   const radianAngle = (angle * Math.PI) / 180;
   
-  // Increased force significantly to compensate for larger bomb size
-  const force = power * 2; // Doubled the force multiplier from /1 to *2
+  // Doubled the force again for maximum power
+  const force = power * 4; // Doubled again from *2 to *4
   
   console.log('Calculated force:', { radianAngle, force });
 
@@ -40,7 +39,7 @@ export const fireBomb = (
   
   const bomb = createBomb(bombX, bombY);
   
-  // Apply force based on angle and power with increased multiplier
+  // Apply force based on angle and power with doubled multiplier
   const forceVector = {
     x: Math.cos(radianAngle) * force,
     y: Math.sin(radianAngle) * force,
