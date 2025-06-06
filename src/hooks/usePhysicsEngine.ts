@@ -11,18 +11,34 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   useEffect(() => {
     if (!sceneRef.current) return;
 
+    // Calculate responsive dimensions while maintaining 16:9 aspect ratio
+    const container = sceneRef.current;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // Use 16:9 aspect ratio (1920:1080)
+    const aspectRatio = 16 / 9;
+    let canvasWidth = containerWidth;
+    let canvasHeight = containerWidth / aspectRatio;
+    
+    // If height is too tall, adjust based on height
+    if (canvasHeight > containerHeight) {
+      canvasHeight = containerHeight;
+      canvasWidth = containerHeight * aspectRatio;
+    }
+
     // Create engine
     const engine = Engine.create();
     engine.world.gravity.y = 0.8;
     engineRef.current = engine;
 
-    // Create renderer with new 1920x1080 dimensions
+    // Create renderer with responsive dimensions
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
       options: {
-        width: 1920,
-        height: 1080,
+        width: canvasWidth,
+        height: canvasHeight,
         wireframes: false,
         background: '#87CEEB', // Cartoon blue sky color
         showAngleIndicator: false,
@@ -35,15 +51,19 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const runner = Runner.create();
     runnerRef.current = runner;
 
-    // Create world objects with adjusted positions for new screen size
-    const ground = createGround();
+    // Scale positions based on canvas size (using 1920x1080 as base)
+    const scaleX = canvasWidth / 1920;
+    const scaleY = canvasHeight / 1080;
+
+    // Create world objects with scaled positions
+    const ground = createGround(canvasWidth, canvasHeight);
     World.add(engine.world, ground);
 
-    const catapult = createCatapult();
+    const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);
 
-    const building1 = createBuilding(1400, 900, 4, 8);
-    const building2 = createBuilding(1650, 900, 3, 6);
+    const building1 = createBuilding(1400 * scaleX, 900 * scaleY, 4, 8);
+    const building2 = createBuilding(1650 * scaleX, 900 * scaleY, 3, 6);
     World.add(engine.world, [...building1, ...building2]);
 
     // Add mouse control
@@ -75,10 +95,15 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   }, [sceneRef]);
 
   const recreateBuildings = () => {
-    if (!engineRef.current) return;
+    if (!engineRef.current || !renderRef.current) return;
 
-    const building1 = createBuilding(1400, 900, 4, 8);
-    const building2 = createBuilding(1650, 900, 3, 6);
+    const canvasWidth = renderRef.current.canvas.width;
+    const canvasHeight = renderRef.current.canvas.height;
+    const scaleX = canvasWidth / 1920;
+    const scaleY = canvasHeight / 1080;
+
+    const building1 = createBuilding(1400 * scaleX, 900 * scaleY, 4, 8);
+    const building2 = createBuilding(1650 * scaleX, 900 * scaleY, 3, 6);
     World.add(engineRef.current.world, [...building1, ...building2]);
   };
 
@@ -93,6 +118,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
 
   return {
     engineRef,
+    renderRef,
     recreateBuildings,
     removeBodiesExceptStatic,
   };

@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 export const Game = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const gameState = useGameState();
-  const { engineRef, recreateBuildings, removeBodiesExceptStatic } = usePhysicsEngine(sceneRef);
+  const { engineRef, renderRef, recreateBuildings, removeBodiesExceptStatic } = usePhysicsEngine(sceneRef);
 
   // Setup collision detection when engine is ready
   useEffect(() => {
@@ -29,6 +29,7 @@ export const Game = () => {
 
     fireBomb(
       engineRef.current,
+      renderRef,
       gameState.power,
       gameState.angle,
       gameState.bombsLeft,
@@ -59,6 +60,7 @@ export const Game = () => {
           <div 
             ref={sceneRef} 
             className="w-full h-full border-2 border-gray-300 rounded-lg shadow-lg bg-gradient-to-b from-sky-200 to-green-200"
+            style={{ height: 'calc(100vh - 2rem)' }}
           />
           <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
             <div className="space-y-2 text-sm font-semibold">

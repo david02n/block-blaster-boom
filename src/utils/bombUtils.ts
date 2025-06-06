@@ -5,14 +5,15 @@ import { toast } from 'sonner';
 
 export const fireBomb = (
   engine: Engine,
+  renderRef: React.RefObject<any>,
   power: number,
   angle: number,
   bombsLeft: number,
   setBombsLeft: (value: React.SetStateAction<number>) => void,
   setGameStarted: (value: React.SetStateAction<boolean>) => void
 ) => {
-  if (bombsLeft <= 0) {
-    console.log('Cannot fire bomb:', { engine: !!engine, bombsLeft });
+  if (bombsLeft <= 0 || !renderRef.current) {
+    console.log('Cannot fire bomb:', { engine: !!engine, bombsLeft, render: !!renderRef.current });
     return;
   }
 
@@ -25,8 +26,15 @@ export const fireBomb = (
   
   console.log('Calculated force:', { radianAngle, force });
 
-  // Adjusted position to match the centered catapult position
-  const bomb = createBomb(960, 600);
+  // Get canvas dimensions for responsive positioning
+  const canvasWidth = renderRef.current.canvas.width;
+  const canvasHeight = renderRef.current.canvas.height;
+  
+  // Position bomb at catapult location (1/4 from left, above ground)
+  const bombX = canvasWidth / 4;
+  const bombY = canvasHeight - 300; // Above the catapult
+  
+  const bomb = createBomb(bombX, bombY);
   
   // Apply force based on angle and power
   const forceVector = {

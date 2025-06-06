@@ -1,7 +1,8 @@
+
 import { Bodies } from 'matter-js';
 
-export const createGround = () => {
-  return Bodies.rectangle(960, 1040, 1920, 80, {
+export const createGround = (canvasWidth: number, canvasHeight: number) => {
+  return Bodies.rectangle(canvasWidth / 2, canvasHeight - 40, canvasWidth, 80, {
     isStatic: true,
     label: 'ground',
     render: {
@@ -12,17 +13,20 @@ export const createGround = () => {
   });
 };
 
-export const createCatapult = () => {
-  // Center the White House on the screen horizontally, positioned above ground
-  return Bodies.rectangle(960, 800, 400, 400, {
+export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
+  // Position catapult at 1/4 from left, above ground
+  const x = canvasWidth / 4;
+  const y = canvasHeight - 200; // 200px above ground
+  
+  return Bodies.rectangle(x, y, 200, 200, {
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#F5F5DC', // Fallback beige color if sprite fails
       sprite: {
         texture: '/lovable-uploads/3a7cfa90-8bf5-4297-9b29-4a235240b8f7.png',
-        xScale: 2.5,  // Scaled to be clearly visible on larger screen
-        yScale: 2.5,  // Scaled to be clearly visible on larger screen
+        xScale: 1.0,  // Start with normal scale
+        yScale: 1.0,  // Start with normal scale
       }
     },
   });
