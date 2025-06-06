@@ -1,3 +1,4 @@
+
 import { Events, Engine, Body, World, Bodies } from 'matter-js';
 import { scaleValue } from './scalingUtils';
 
@@ -41,7 +42,11 @@ export const setupCollisionDetection = (
     });
   });
 
-  // Check for blocks falling off the island (screen boundaries) - MUCH more conservative
+  // DISABLED boundary checking that was causing blocks to disappear
+  // The boundary checking was incorrectly removing blocks that were just settling
+  console.log('Boundary checking DISABLED to prevent block disappearing');
+  
+  // Only check for blocks that are EXTREMELY far off screen (like really, really far)
   const checkBoundaries = () => {
     const canvasWidth = engine.render?.canvas?.width || 1920;
     const canvasHeight = engine.render?.canvas?.height || 1080;
@@ -50,41 +55,58 @@ export const setupCollisionDetection = (
     
     engine.world.bodies.forEach((body) => {
       if (body.label === 'block' && !destroyedBlocksRef.current.has(body)) {
-        // EXTREMELY generous boundaries - only remove blocks that are WAY WAY off screen
-        const margin = canvasWidth; // Much larger margin - full canvas width
-        if (body.position.x < -margin || 
-            body.position.x > canvasWidth + margin || 
-            body.position.y > canvasHeight + (canvasHeight * 0.5)) { // Much more generous Y boundary
-          
-          console.log('Block fell WAY off screen and will be removed:', { 
+        // EXTREMELY conservative boundaries - only remove blocks that are ridiculously far away
+        const extremeMarginX = canvasWidth * 3; // 3x canvas width margin
+        const extremeMarginY = canvasHeight * 2; // 2x canvas height margin below ground
+        
+        const isExtremelyFarLeft = body.position.x < -extremeMarginX;
+        const isExtremelyFarRight = body.position.x > canvasWidth + extremeMarginX;
+        const isExtremelyFarDown = body.position.y > canvasHeight + extremeMarginY;
+        
+        if (isExtremelyFarLeft || isExtremelyFarRight || isExtremelyFarDown) {
+          console.log('Block is EXTREMELY far off screen and will be removed:', { 
             id: body.id, 
             x: body.position.x, 
             y: body.position.y,
             canvasWidth,
             canvasHeight,
-            margin
+            extremeMarginX,
+            extremeMarginY,
+            isExtremelyFarLeft,
+            isExtremelyFarRight,
+            isExtremelyFarDown
           });
           
           blocksToRemove.push(body);
           destroyedBlocksRef.current.add(body);
           setBlocksDestroyed(prev => prev + 1);
           setScore(prev => prev + 5); // Less points for blocks that just fall off
+        } else {
+          // Log block positions periodically to debug disappearing issue
+          if (Math.random() < 0.001) { // Very rare logging
+            console.log('Block position check:', {
+              id: body.id,
+              x: body.position.x,
+              y: body.position.y,
+              isDestroyed: destroyedBlocksRef.current.has(body)
+            });
+          }
         }
       }
     });
     
     // Remove fallen blocks from the world
     if (blocksToRemove.length > 0) {
-      console.log(`Removing ${blocksToRemove.length} blocks that fell WAY off screen`);
+      console.log(`Removing ${blocksToRemove.length} blocks that were EXTREMELY far off screen`);
       World.remove(engine.world, blocksToRemove);
     }
   };
 
-  // Check boundaries much less frequently
+  // Check boundaries MUCH less frequently to reduce impact
   let frameCount = 0;
   Events.on(engine, 'beforeUpdate', () => {
     frameCount++;
-    if (frameCount % 300 === 0) { // Check every 300 frames (roughly every 5 seconds)
+    if (frameCount % 1800 === 0) { // Check every 1800 frames (roughly every 30 seconds)
       checkBoundaries();
     }
   });
