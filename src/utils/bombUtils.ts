@@ -1,5 +1,6 @@
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
+import { audioManager } from './audioUtils';
 import { toast } from 'sonner';
 
 export const fireBomb = (
@@ -17,6 +18,9 @@ export const fireBomb = (
   }
 
   console.log('Firing bomb with:', { power, angle, bombsLeft });
+
+  // Play Trump "China" sound effect
+  audioManager.playTrumpChina();
 
   const radianAngle = (angle * Math.PI) / 180;
   

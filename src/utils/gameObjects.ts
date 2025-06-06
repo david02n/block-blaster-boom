@@ -1,3 +1,4 @@
+
 import { Bodies } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -66,7 +67,7 @@ export const createBuilding = (x: number, groundY: number, width: number, height
         friction: 0.7,
         density: 0.6,
         render: {
-          fillStyle: getBlockColor(row, col),
+          fillStyle: getChineseFlagBlockColor(row, col, width, height),
           strokeStyle: '#333',
           lineWidth: 1,
         },
@@ -79,17 +80,36 @@ export const createBuilding = (x: number, groundY: number, width: number, height
   return blocks;
 };
 
-const getBlockColor = (row: number, col: number): string => {
-  const colors = [
-    '#FFFFFF', // White for main building structure
-    '#E8E8E8', // Light gray
-    '#D0D0D0', // Medium gray
-    '#B8B8B8', // Darker gray
-    '#4A90E2', // Blue for windows/details
-    '#2E5BBA', // Darker blue
-    '#87CEEB', // Sky blue
-    '#F0F8FF', // Alice blue
-  ];
+const getChineseFlagBlockColor = (row: number, col: number, width: number, height: number): string => {
+  // Chinese flag has red background with yellow stars
+  // We'll create a simplified pattern with red background and yellow accents for stars
   
-  return colors[(row + col) % colors.length];
+  // Most blocks are red (Chinese flag background)
+  const redColor = '#DE2910'; // Official Chinese flag red
+  const yellowColor = '#FFDE00'; // Official Chinese flag yellow
+  
+  // Create a pattern that resembles the Chinese flag layout
+  // Large star position (upper left area)
+  const isLargeStarArea = row < height * 0.3 && col < width * 0.3;
+  
+  // Small stars positions (arranged around the large star)
+  const isSmallStar1 = row === Math.floor(height * 0.15) && col === Math.floor(width * 0.4);
+  const isSmallStar2 = row === Math.floor(height * 0.25) && col === Math.floor(width * 0.45);
+  const isSmallStar3 = row === Math.floor(height * 0.35) && col === Math.floor(width * 0.4);
+  const isSmallStar4 = row === Math.floor(height * 0.3) && col === Math.floor(width * 0.35);
+  
+  // Large star center
+  const isLargeStarCenter = row === Math.floor(height * 0.2) && col === Math.floor(width * 0.2);
+  
+  if (isLargeStarCenter || isSmallStar1 || isSmallStar2 || isSmallStar3 || isSmallStar4) {
+    return yellowColor;
+  }
+  
+  // Some yellow blocks near star areas to create star-like patterns
+  if (isLargeStarArea && (row + col) % 4 === 0) {
+    return yellowColor;
+  }
+  
+  // Default red background
+  return redColor;
 };
