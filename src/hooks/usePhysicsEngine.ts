@@ -55,9 +55,19 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     World.add(engine.world, catapult);
 
     // Position single large tower properly on the right ground segment
-    // Calculate the actual ground surface level (top of the ground body)
-    const groundBodyY = canvasHeight - (10 * scaleConfig.scale);
-    const groundSurfaceLevel = groundBodyY - (10 * scaleConfig.scale); // Subtract half ground height to get surface
+    // Calculate the correct ground surface level
+    const groundBodyY = canvasHeight - (10 * scaleConfig.scale); // Center of ground body
+    const groundHeight = 20 * scaleConfig.scale; // Total ground height
+    const groundSurfaceLevel = groundBodyY - (groundHeight / 2); // Top surface of ground
+    
+    console.log('Ground positioning:', {
+      canvasHeight,
+      scale: scaleConfig.scale,
+      groundBodyY,
+      groundHeight,
+      groundSurfaceLevel
+    });
+    
     const largeTower = createLargeTower(canvasWidth * 0.8, groundSurfaceLevel, scaleConfig.scale);
     World.add(engine.world, largeTower);
 
@@ -118,7 +128,8 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     
     // Calculate the correct ground surface level
     const groundBodyY = canvasHeight - (10 * scaleConfig.scale);
-    const groundSurfaceLevel = groundBodyY - (10 * scaleConfig.scale);
+    const groundHeight = 20 * scaleConfig.scale;
+    const groundSurfaceLevel = groundBodyY - (groundHeight / 2);
 
     // Create single large tower on the right ground segment
     const largeTower = createLargeTower(canvasWidth * 0.8, groundSurfaceLevel, scaleConfig.scale);
