@@ -58,9 +58,9 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);
 
-    // Position single large tower in the center-right of the screen
-    const groundLevel = canvasHeight - 80; // Just above the actual ground physics body
-    const largeTower = createLargeTower(canvasWidth * 0.7, groundLevel); // Centered at 70% of screen width
+    // Position single large tower properly on the ground
+    const groundLevel = canvasHeight - 20; // Match the new ground level
+    const largeTower = createLargeTower(canvasWidth * 0.75, groundLevel); // Moved slightly more right
     World.add(engine.world, largeTower);
 
     // Add mouse control
@@ -96,10 +96,10 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
 
     const canvasWidth = renderRef.current.canvas.width;
     const canvasHeight = renderRef.current.canvas.height;
-    const groundLevel = canvasHeight - 80; // Match the actual ground level
+    const groundLevel = canvasHeight - 20; // Match the updated ground level
 
     // Create single large tower
-    const largeTower = createLargeTower(canvasWidth * 0.7, groundLevel);
+    const largeTower = createLargeTower(canvasWidth * 0.75, groundLevel);
     World.add(engineRef.current.world, largeTower);
   };
 

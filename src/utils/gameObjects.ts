@@ -2,12 +2,12 @@ import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
   // Create segmented ground with gaps
-  const groundY = canvasHeight - 40; // Near the bottom of the screen
-  const groundHeight = 80;
+  const groundY = canvasHeight - 20; // Moved closer to bottom for better visual
+  const groundHeight = 40; // Reduced height for cleaner look
   const grounds = [];
   
-  // Left ground segment (under catapult area)
-  const leftGroundWidth = canvasWidth * 0.35; // 35% of screen width
+  // Left ground segment (under catapult area) - extended for better catapult support
+  const leftGroundWidth = canvasWidth * 0.4; // Increased from 35% to 40%
   const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
@@ -19,9 +19,9 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
   });
   grounds.push(leftGround);
   
-  // Right ground segment (under building area) - moved to start earlier to support buildings
-  const rightGroundStart = canvasWidth * 0.5; // Start at 50% instead of 55%
-  const rightGroundWidth = canvasWidth * 0.5; // 50% of screen width
+  // Right ground segment (under building area) 
+  const rightGroundStart = canvasWidth * 0.55; // Moved back to 55% for better gap
+  const rightGroundWidth = canvasWidth * 0.45; // Adjusted to 45%
   const rightGround = Bodies.rectangle(
     rightGroundStart + rightGroundWidth / 2, 
     groundY, 
@@ -43,19 +43,19 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
 };
 
 export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
-  // Position catapult higher up and more to the left to avoid cropping
-  const x = canvasWidth * 0.12; // Moved further left from 15% to 12%
-  const y = canvasHeight - 200; // Moved higher up from -120 to -200
+  // Position catapult properly on the ground level
+  const x = canvasWidth * 0.15; // Back to 15% for better positioning
+  const y = canvasHeight - 100; // Positioned to sit properly on ground
   
-  return Bodies.rectangle(x, y, 150, 150, { // Increased from 100x100 to 150x150
+  return Bodies.rectangle(x, y, 120, 120, { // Slightly smaller for better proportions
     isStatic: true,
     label: 'catapult',
     render: {
       fillStyle: '#8B4513', // Fallback brown color if sprite fails
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
-        xScale: 0.75,  // Adjusted from 1.0 to 0.75 to fit better in the larger physics body
-        yScale: 0.75,  // Adjusted from 1.0 to 0.75 to fit better in the larger physics body
+        xScale: 0.6,  // Adjusted for better fit
+        yScale: 0.6,  // Adjusted for better fit
       }
     },
   });
@@ -90,7 +90,8 @@ export const createLargeTower = (x: number, groundY: number) => {
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      const blockY = groundY - row * blockHeight - blockHeight / 2;
+      // Properly position blocks to sit on the ground
+      const blockY = groundY - 40 - row * blockHeight - blockHeight / 2; // Adjusted to sit on ground
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
