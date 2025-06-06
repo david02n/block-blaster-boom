@@ -1,4 +1,3 @@
-
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { toast } from 'sonner';
@@ -30,9 +29,9 @@ export const fireBomb = (
   const canvasWidth = renderRef.current.canvas.width;
   const canvasHeight = renderRef.current.canvas.height;
   
-  // Position bomb at catapult location (1/4 from left, above ground)
-  const bombX = canvasWidth / 4;
-  const bombY = canvasHeight - 300; // Above the catapult
+  // Position bomb at catapult location (15% from left, above ground)
+  const bombX = canvasWidth * 0.15;
+  const bombY = canvasHeight - 200; // Above the catapult
   
   const bomb = createBomb(bombX, bombY);
   

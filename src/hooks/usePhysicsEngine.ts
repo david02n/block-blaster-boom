@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from 'react';
 import { Engine, Render, World, Runner, Mouse, MouseConstraint } from 'matter-js';
 import { createBuilding, createGround, createCatapult } from '../utils/gameObjects';
@@ -51,19 +50,17 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const runner = Runner.create();
     runnerRef.current = runner;
 
-    // Scale positions based on canvas size (using 1920x1080 as base)
-    const scaleX = canvasWidth / 1920;
-    const scaleY = canvasHeight / 1080;
-
-    // Create world objects with scaled positions
+    // Create world objects with better positioning like the reference image
     const ground = createGround(canvasWidth, canvasHeight);
     World.add(engine.world, ground);
 
     const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);
 
-    const building1 = createBuilding(1400 * scaleX, 900 * scaleY, 4, 8);
-    const building2 = createBuilding(1650 * scaleX, 900 * scaleY, 3, 6);
+    // Position buildings more centrally like the White House in reference
+    const groundLevel = canvasHeight - 80;
+    const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10); // Main building - larger and central
+    const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);  // Side building
     World.add(engine.world, [...building1, ...building2]);
 
     // Add mouse control
@@ -99,11 +96,10 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
 
     const canvasWidth = renderRef.current.canvas.width;
     const canvasHeight = renderRef.current.canvas.height;
-    const scaleX = canvasWidth / 1920;
-    const scaleY = canvasHeight / 1080;
+    const groundLevel = canvasHeight - 80;
 
-    const building1 = createBuilding(1400 * scaleX, 900 * scaleY, 4, 8);
-    const building2 = createBuilding(1650 * scaleX, 900 * scaleY, 3, 6);
+    const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10);
+    const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);
     World.add(engineRef.current.world, [...building1, ...building2]);
   };
 
