@@ -1,5 +1,5 @@
 
-import { Engine, World, Body } from 'matter-js';
+import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { toast } from 'sonner';
 
@@ -67,6 +67,60 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
   
   console.log('Creating explosion at:', bomb.position);
   
+  // Create visual explosion effect
+  const explosionEffect = Bodies.circle(bomb.position.x, bomb.position.y, 5, {
+    isStatic: true,
+    isSensor: true,
+    label: 'explosion',
+    render: {
+      fillStyle: '#FF6600',
+      strokeStyle: '#FF0000',
+      lineWidth: 3,
+    },
+  });
+  
+  World.add(engine.world, explosionEffect);
+  
+  // Animate explosion expansion
+  let currentRadius = 5;
+  const maxRadius = explosionRadius;
+  const expansionRate = 15;
+  
+  const expandExplosion = () => {
+    if (currentRadius < maxRadius) {
+      currentRadius += expansionRate;
+      
+      // Remove old explosion effect
+      World.remove(engine.world, explosionEffect);
+      
+      // Create new larger explosion effect
+      const newExplosion = Bodies.circle(bomb.position.x, bomb.position.y, currentRadius, {
+        isStatic: true,
+        isSensor: true,
+        label: 'explosion',
+        render: {
+          fillStyle: `rgba(255, 102, 0, ${1 - (currentRadius / maxRadius) * 0.8})`,
+          strokeStyle: '#FF0000',
+          lineWidth: 2,
+        },
+      });
+      
+      World.add(engine.world, newExplosion);
+      
+      setTimeout(expandExplosion, 50);
+      
+      // Remove explosion effect when it reaches max radius
+      if (currentRadius >= maxRadius) {
+        setTimeout(() => {
+          World.remove(engine.world, newExplosion);
+        }, 500);
+      }
+    }
+  };
+  
+  expandExplosion();
+  
+  // Apply explosion force to blocks
   engine.world.bodies.forEach((body) => {
     if (body.label === 'block' && !body.isStatic) {
       const distance = Math.sqrt(
