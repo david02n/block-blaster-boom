@@ -72,11 +72,12 @@ export const fireBomb = (
 
 const explodeBomb = (engine: Engine, bomb: Body) => {
   const explosionRadius = 150;
-  const explosionForce = 20; // Increased from 2 to 20 for extremely powerful blast
+  const explosionForce = 20;
+  const explosionEffects: Body[] = [];
   
   console.log('Creating explosion at:', bomb.position);
   
-  // Create visual explosion effect
+  // Create initial explosion effect
   const explosionEffect = Bodies.circle(bomb.position.x, bomb.position.y, 5, {
     isStatic: true,
     isSensor: true,
@@ -89,6 +90,7 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
   });
   
   World.add(engine.world, explosionEffect);
+  explosionEffects.push(explosionEffect);
   
   // Animate explosion expansion
   let currentRadius = 5;
@@ -98,9 +100,6 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
   const expandExplosion = () => {
     if (currentRadius < maxRadius) {
       currentRadius += expansionRate;
-      
-      // Remove old explosion effect
-      World.remove(engine.world, explosionEffect);
       
       // Create new larger explosion effect
       const newExplosion = Bodies.circle(bomb.position.x, bomb.position.y, currentRadius, {
@@ -115,15 +114,17 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
       });
       
       World.add(engine.world, newExplosion);
+      explosionEffects.push(newExplosion);
       
       setTimeout(expandExplosion, 50);
-      
-      // Remove explosion effect when it reaches max radius
-      if (currentRadius >= maxRadius) {
-        setTimeout(() => {
-          World.remove(engine.world, newExplosion);
-        }, 500);
-      }
+    } else {
+      // Clean up all explosion effects after expansion is complete
+      setTimeout(() => {
+        console.log('Cleaning up explosion effects');
+        explosionEffects.forEach(effect => {
+          World.remove(engine.world, effect);
+        });
+      }, 500);
     }
   };
   

@@ -1,5 +1,5 @@
 
-import { Events, Engine, Body } from 'matter-js';
+import { Events, Engine, Body, World } from 'matter-js';
 
 export const setupCollisionDetection = (
   engine: Engine,
@@ -30,4 +30,42 @@ export const setupCollisionDetection = (
       }
     });
   });
+
+  // Check for blocks falling off the island (screen boundaries)
+  const checkBoundaries = () => {
+    const canvasWidth = engine.render?.canvas?.width || 1920;
+    const canvasHeight = engine.render?.canvas?.height || 1080;
+    const groundLevel = canvasHeight - 80; // Ground is 40px high, so top is at height - 80
+    
+    const blocksToRemove: Body[] = [];
+    
+    engine.world.bodies.forEach((body) => {
+      if (body.label === 'block' && !destroyedBlocksRef.current.has(body)) {
+        // Check if block fell off the sides or below the screen
+        if (body.position.x < -50 || 
+            body.position.x > canvasWidth + 50 || 
+            body.position.y > canvasHeight + 100) {
+          
+          console.log('Block fell off island:', { 
+            id: body.id, 
+            x: body.position.x, 
+            y: body.position.y 
+          });
+          
+          blocksToRemove.push(body);
+          destroyedBlocksRef.current.add(body);
+          setBlocksDestroyed(prev => prev + 1);
+          setScore(prev => prev + 5); // Less points for blocks that just fall off
+        }
+      }
+    });
+    
+    // Remove fallen blocks from the world
+    if (blocksToRemove.length > 0) {
+      World.remove(engine.world, blocksToRemove);
+    }
+  };
+
+  // Check boundaries every frame
+  Events.on(engine, 'beforeUpdate', checkBoundaries);
 };
