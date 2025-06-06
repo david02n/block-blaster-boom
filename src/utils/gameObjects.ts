@@ -6,17 +6,24 @@ export const createGround = () => {
     isStatic: true,
     label: 'ground',
     render: {
-      fillStyle: '#8B4513',
+      fillStyle: '#4A7C59', // Grass green color
+      strokeStyle: '#2D5233',
+      lineWidth: 2,
     },
   });
 };
 
 export const createCatapult = () => {
-  return Bodies.rectangle(100, 520, 80, 80, {
+  return Bodies.rectangle(100, 480, 120, 120, {
     isStatic: true,
     label: 'catapult',
     render: {
-      fillStyle: '#654321',
+      fillStyle: '#F5F5DC', // Fallback beige color if sprite fails
+      sprite: {
+        texture: '/lovable-uploads/d235bf32-51a4-45f5-b40c-721e2e9522f2.png',
+        xScale: 0.15,
+        yScale: 0.15,
+      }
     },
   });
 };
@@ -31,7 +38,7 @@ export const createBomb = (x: number, y: number) => {
       fillStyle: '#FF0000', // Fallback red color if sprite fails
       sprite: {
         texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
-        xScale: 0.1, // Slightly larger scale
+        xScale: 0.1,
         yScale: 0.1,
       }
     },

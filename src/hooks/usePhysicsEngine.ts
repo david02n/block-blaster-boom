@@ -16,7 +16,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     engine.world.gravity.y = 0.8;
     engineRef.current = engine;
 
-    // Create renderer
+    // Create renderer with grass-themed background
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
@@ -24,7 +24,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
         width: 1000,
         height: 600,
         wireframes: false,
-        background: 'linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%)',
+        background: 'linear-gradient(180deg, #87CEEB 0%, #98E4D6 50%, #7CB342 100%)',
         showAngleIndicator: false,
         showVelocity: false,
       },
