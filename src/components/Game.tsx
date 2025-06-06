@@ -140,8 +140,8 @@ export const Game = () => {
     const engine = engineRef.current;
     const radianAngle = (angle * Math.PI) / 180;
     
-    // Dramatically increase force multiplier for much more power
-    const force = power / 2; // Changed from 15 to 2 for massive increase in power
+    // Increase force multiplier by 50% for even more power
+    const force = power / 1.33; // Changed from 2 to 1.33 for 50% more power
     
     console.log('Calculated force:', { radianAngle, force });
 
