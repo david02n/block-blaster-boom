@@ -47,23 +47,24 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const runner = Runner.create();
     runnerRef.current = runner;
 
+    // Ground top is at fixed position: 80% down from top of window
+    const groundTopY = canvasHeight * 0.8;
+    
+    console.log('Setting ground top at fixed position:', {
+      canvasHeight,
+      groundTopY,
+      scale: scaleConfig.scale
+    });
+
     // Create segmented ground with gaps using scale
-    const groundSegments = createGround(canvasWidth, canvasHeight, scaleConfig.scale);
+    const groundSegments = createGround(canvasWidth, canvasHeight, scaleConfig.scale, groundTopY);
     World.add(engine.world, groundSegments);
 
-    const catapult = createCatapult(canvasWidth, canvasHeight, scaleConfig.scale);
+    const catapult = createCatapult(canvasWidth, canvasHeight, scaleConfig.scale, groundTopY);
     World.add(engine.world, catapult);
 
-    // Use a fixed ground level that doesn't change with resizing
-    const fixedGroundLevel = canvasHeight - 50; // Fixed 50px from bottom
-    
-    console.log('Fixed ground positioning:', {
-      canvasHeight,
-      scale: scaleConfig.scale,
-      fixedGroundLevel
-    });
-    
-    const largeTower = createLargeTower(canvasWidth * 0.8, fixedGroundLevel, scaleConfig.scale);
+    // Create tower starting from ground top (zero level)
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundTopY, scaleConfig.scale);
     World.add(engine.world, largeTower);
 
     // Add mouse control
@@ -121,11 +122,11 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const canvasHeight = containerRect.height;
     const scaleConfig = calculateScale(canvasWidth, canvasHeight);
     
-    // Use the same fixed ground level
-    const fixedGroundLevel = canvasHeight - 50;
+    // Use the same fixed ground top position
+    const groundTopY = canvasHeight * 0.8;
 
-    // Create single large tower on the right ground segment
-    const largeTower = createLargeTower(canvasWidth * 0.8, fixedGroundLevel, scaleConfig.scale);
+    // Create single large tower starting from ground top
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundTopY, scaleConfig.scale);
     World.add(engineRef.current.world, largeTower);
   };
 

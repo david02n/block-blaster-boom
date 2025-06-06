@@ -2,15 +2,15 @@
 import { Bodies, Body } from 'matter-js';
 import { scaleValue, scalePosition } from './scalingUtils';
 
-export const createGround = (canvasWidth: number, canvasHeight: number, scale: number) => {
-  // Create segmented ground with gaps - positioned at the very bottom
-  const groundY = canvasHeight - scaleValue(10, scale);
+export const createGround = (canvasWidth: number, canvasHeight: number, scale: number, groundTopY: number) => {
+  // Create segmented ground with gaps - positioned at groundTopY
   const groundHeight = scaleValue(20, scale);
+  const groundCenterY = groundTopY + (groundHeight / 2);
   const grounds = [];
   
   // Left ground segment (under catapult area) - scaled positioning
   const leftGroundWidth = scaleValue(540, scale);
-  const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
+  const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundCenterY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
     render: {
@@ -26,7 +26,7 @@ export const createGround = (canvasWidth: number, canvasHeight: number, scale: n
   const rightGroundWidth = scaleValue(480, scale);
   const rightGround = Bodies.rectangle(
     rightGroundStart + rightGroundWidth / 2, 
-    groundY, 
+    groundCenterY, 
     rightGroundWidth, 
     groundHeight, 
     {
@@ -44,14 +44,13 @@ export const createGround = (canvasWidth: number, canvasHeight: number, scale: n
   return grounds;
 };
 
-export const createCatapult = (canvasWidth: number, canvasHeight: number, scale: number) => {
+export const createCatapult = (canvasWidth: number, canvasHeight: number, scale: number, groundTopY: number) => {
   // Scaled position for catapult
   const x = scaleValue(240, scale);
-  const groundLevel = canvasHeight - scaleValue(10, scale);
-  const catapultHeight = scaleValue(180, scale);
-  const y = groundLevel - catapultHeight;
+  const catapultHeight = scaleValue(120, scale);
+  const y = groundTopY - (catapultHeight / 2);
   
-  return Bodies.rectangle(x, y, scaleValue(120, scale), scaleValue(120, scale), {
+  return Bodies.rectangle(x, y, scaleValue(120, scale), catapultHeight, {
     isStatic: true,
     label: 'catapult',
     render: {
@@ -82,7 +81,7 @@ export const createBomb = (x: number, y: number, scale: number) => {
   });
 };
 
-export const createLargeTower = (x: number, groundY: number, scale: number) => {
+export const createLargeTower = (x: number, groundTopY: number, scale: number) => {
   const blocks = [];
   const blockWidth = scaleValue(30, scale);
   const blockHeight = scaleValue(20, scale);
@@ -91,15 +90,8 @@ export const createLargeTower = (x: number, groundY: number, scale: number) => {
   const width = 12;
   const height = 20;
 
-  // The groundY is the center of the ground body (50px from bottom)
-  // We need to calculate the actual ground surface (top of the ground)
-  const groundHeight = scaleValue(20, scale);
-  const groundSurface = groundY - (groundHeight / 2);
-
-  console.log('Creating tower with corrected positioning:', {
-    groundY,
-    groundHeight,
-    groundSurface,
+  console.log('Creating tower with zero-based positioning:', {
+    groundTopY,
     blockHeight,
     scale
   });
@@ -107,9 +99,9 @@ export const createLargeTower = (x: number, groundY: number, scale: number) => {
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // Position blocks starting from the ground surface, building upwards
-      // Each block sits on top of the previous row
-      const blockY = groundSurface - (row * blockHeight) - (blockHeight / 2);
+      // Position blocks starting from zero (ground top), building upwards (negative Y)
+      // Row 0 sits right on the ground, row 1 is one block height above, etc.
+      const blockY = groundTopY - (row * blockHeight) - (blockHeight / 2);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
