@@ -9,6 +9,7 @@ export const Game = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Engine>();
   const renderRef = useRef<Render>();
+  const destroyedBlocksRef = useRef<Set<Body>>(new Set());
   const [power, setPower] = useState(50);
   const [angle, setAngle] = useState(-45);
   const [score, setScore] = useState(0);
@@ -77,9 +78,9 @@ export const Game = () => {
           const block = bodyA.label === 'block' ? bodyA : bodyB;
           const bomb = bodyA.label === 'bomb' ? bodyA : bodyB;
           
-          // Mark block for destruction
-          if (!block.isDestroyed) {
-            block.isDestroyed = true;
+          // Mark block for destruction using Set
+          if (!destroyedBlocksRef.current.has(block)) {
+            destroyedBlocksRef.current.add(block);
             setBlocksDestroyed(prev => prev + 1);
             setScore(prev => prev + 10);
             
@@ -161,6 +162,7 @@ export const Game = () => {
     setBlocksDestroyed(0);
     setBombsLeft(5);
     setGameStarted(false);
+    destroyedBlocksRef.current.clear();
 
     // Recreate buildings
     const building1 = createBuilding(700, 500, 4, 8);
