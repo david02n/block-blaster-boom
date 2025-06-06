@@ -1,3 +1,4 @@
+
 import { Bodies } from 'matter-js';
 
 export const createGround = () => {
@@ -25,12 +26,13 @@ export const createBomb = (x: number, y: number) => {
     label: 'bomb',
     restitution: 0.3,
     friction: 0.4,
-    density: 1.5, // Increased density for more impact
+    density: 1.5,
     render: {
+      fillStyle: '#FF0000', // Fallback red color if sprite fails
       sprite: {
         texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
-        xScale: 0.08, // Scale down the image to fit the circle
-        yScale: 0.08,
+        xScale: 0.1, // Slightly larger scale
+        yScale: 0.1,
       }
     },
   });
