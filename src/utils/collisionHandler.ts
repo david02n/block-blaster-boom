@@ -41,7 +41,7 @@ export const setupCollisionDetection = (
     });
   });
 
-  // Check for blocks falling off the island (screen boundaries) - made less aggressive
+  // Check for blocks falling off the island (screen boundaries) - MUCH more conservative
   const checkBoundaries = () => {
     const canvasWidth = engine.render?.canvas?.width || 1920;
     const canvasHeight = engine.render?.canvas?.height || 1080;
@@ -50,18 +50,19 @@ export const setupCollisionDetection = (
     
     engine.world.bodies.forEach((body) => {
       if (body.label === 'block' && !destroyedBlocksRef.current.has(body)) {
-        // More generous boundaries - only remove blocks that are way off screen
-        const margin = 200; // Increased margin
+        // EXTREMELY generous boundaries - only remove blocks that are WAY WAY off screen
+        const margin = canvasWidth; // Much larger margin - full canvas width
         if (body.position.x < -margin || 
             body.position.x > canvasWidth + margin || 
-            body.position.y > canvasHeight + margin) {
+            body.position.y > canvasHeight + (canvasHeight * 0.5)) { // Much more generous Y boundary
           
-          console.log('Block fell way off screen:', { 
+          console.log('Block fell WAY off screen and will be removed:', { 
             id: body.id, 
             x: body.position.x, 
             y: body.position.y,
             canvasWidth,
-            canvasHeight
+            canvasHeight,
+            margin
           });
           
           blocksToRemove.push(body);
@@ -74,16 +75,16 @@ export const setupCollisionDetection = (
     
     // Remove fallen blocks from the world
     if (blocksToRemove.length > 0) {
-      console.log(`Removing ${blocksToRemove.length} blocks that fell off screen`);
+      console.log(`Removing ${blocksToRemove.length} blocks that fell WAY off screen`);
       World.remove(engine.world, blocksToRemove);
     }
   };
 
-  // Check boundaries every few frames instead of every frame
+  // Check boundaries much less frequently
   let frameCount = 0;
   Events.on(engine, 'beforeUpdate', () => {
     frameCount++;
-    if (frameCount % 60 === 0) { // Check every 60 frames (roughly once per second)
+    if (frameCount % 300 === 0) { // Check every 300 frames (roughly every 5 seconds)
       checkBoundaries();
     }
   });

@@ -3,13 +3,32 @@ import { scaleValue, scalePosition } from './scalingUtils';
 
 export const createGround = (canvasWidth: number, canvasHeight: number, scale: number, groundTopY: number) => {
   // Create continuous ground without gaps - positioned at groundTopY
-  const groundHeight = scaleValue(20, scale);
+  const groundHeight = scaleValue(40, scale); // Increased thickness for stability
   const groundCenterY = groundTopY + (groundHeight / 2);
   const grounds = [];
   
-  // Create a single continuous ground piece that spans the entire width
-  const groundWidth = canvasWidth;
-  const ground = Bodies.rectangle(canvasWidth / 2, groundCenterY, groundWidth, groundHeight, {
+  // Create multiple overlapping ground segments to ensure NO GAPS
+  const segmentWidth = canvasWidth * 0.3; // Wider segments with overlap
+  const segments = Math.ceil(canvasWidth / (segmentWidth * 0.8)) + 2; // Extra segments with overlap
+  
+  for (let i = 0; i < segments; i++) {
+    const segmentX = (i * segmentWidth * 0.8) - (segmentWidth * 0.1); // Overlap segments
+    const ground = Bodies.rectangle(segmentX, groundCenterY, segmentWidth, groundHeight, {
+      isStatic: true,
+      label: 'ground',
+      render: {
+        fillStyle: '#8B4513',
+        strokeStyle: '#654321',
+        lineWidth: 1,
+      },
+    });
+    grounds.push(ground);
+  }
+  
+  // Add extra ground segments specifically under the tower area
+  const towerX = canvasWidth * 0.8;
+  const towerGroundWidth = canvasWidth * 0.4; // Wide coverage under tower
+  const towerGround = Bodies.rectangle(towerX, groundCenterY, towerGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
     render: {
@@ -18,13 +37,15 @@ export const createGround = (canvasWidth: number, canvasHeight: number, scale: n
       lineWidth: 1,
     },
   });
-  grounds.push(ground);
+  grounds.push(towerGround);
   
-  console.log('Created continuous ground:', {
-    width: groundWidth,
-    centerY: groundCenterY,
+  console.log('Created overlapping ground segments:', {
+    segments: segments + 1,
+    groundCenterY: groundCenterY,
     topY: groundTopY,
-    canvasWidth
+    canvasWidth,
+    towerX,
+    towerGroundWidth
   });
   
   return grounds;
@@ -76,7 +97,7 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
   const width = 12;
   const height = 20;
 
-  console.log('Building tower with continuous ground support:', {
+  console.log('Building tower with ground coverage:', {
     groundTopY,
     blockWidth,
     blockHeight,
@@ -99,9 +120,8 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - (width - 1) / 2) * blockWidth;
       
-      // Position blocks precisely on the continuous ground
-      // Bottom row (row 0): bottom edge exactly at groundTopY
-      // Each subsequent row: stacked directly on top of previous row
+      // Position blocks EXACTLY on the ground surface
+      // Bottom row sits directly on groundTopY
       const blockY = groundTopY - (blockHeight / 2) - (row * blockHeight);
 
       console.log(`Block row ${row}, col ${col}: X=${blockX}, Y=${blockY}, bottomEdge=${blockY + blockHeight/2}, groundTopY=${groundTopY}`);
@@ -133,13 +153,13 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
     console.log(`Adding ${blocks.length} static blocks to world`);
   }
 
-  // Restore physics after construction with careful timing
+  // Restore physics after construction with increased wait time
   if (engine && originalGravity !== undefined) {
     setTimeout(() => {
       console.log('Restoring gravity and making blocks dynamic');
       engine.world.gravity.y = originalGravity;
       
-      // Make blocks dynamic row by row from bottom to top
+      // Make blocks dynamic row by row from bottom to top with longer delays
       for (let row = 0; row < height; row++) {
         setTimeout(() => {
           const rowBlocks = blocks.filter((_, index) => Math.floor(index / width) === row);
@@ -147,9 +167,9 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
             Body.setStatic(block, false);
           });
           console.log(`Row ${row} blocks made dynamic`);
-        }, row * 50); // 50ms delay between rows
+        }, row * 100); // Increased delay between rows
       }
-    }, 500); // Increased wait time to ensure proper positioning
+    }, 1000); // Increased initial wait time
   }
 
   return blocks;
