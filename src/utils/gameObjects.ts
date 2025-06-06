@@ -1,4 +1,3 @@
-
 import { Bodies } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -27,8 +26,8 @@ export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
       fillStyle: '#8B4513', // Fallback brown color if sprite fails
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
-        xScale: 0.25,  // Smaller catapult
-        yScale: 0.25,  // Smaller catapult
+        xScale: 0.5,  // Doubled from 0.25 to 0.5
+        yScale: 0.5,  // Doubled from 0.25 to 0.5
       }
     },
   });
