@@ -1,4 +1,3 @@
-
 import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -44,9 +43,9 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
 };
 
 export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
-  // Position catapult at far left, sitting on the ground
-  const x = canvasWidth * 0.15; // 15% from left edge
-  const y = canvasHeight - 120; // Just above the ground level
+  // Position catapult higher up and more to the left to avoid cropping
+  const x = canvasWidth * 0.12; // Moved further left from 15% to 12%
+  const y = canvasHeight - 200; // Moved higher up from -120 to -200
   
   return Bodies.rectangle(x, y, 150, 150, { // Increased from 100x100 to 150x150
     isStatic: true,
