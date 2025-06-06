@@ -63,8 +63,8 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const catapult = createCatapult(canvasWidth, canvasHeight, scaleConfig.scale, groundTopY);
     World.add(engine.world, catapult);
 
-    // Create tower starting from ground top (zero level)
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundTopY, scaleConfig.scale);
+    // Create tower with engine reference for physics stabilization
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundTopY, scaleConfig.scale, engine);
     World.add(engine.world, largeTower);
 
     // Add mouse control
@@ -125,8 +125,8 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     // Use the same fixed ground top position
     const groundTopY = canvasHeight * 0.8;
 
-    // Create single large tower starting from ground top
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundTopY, scaleConfig.scale);
+    // Create single large tower with engine reference for physics stabilization
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundTopY, scaleConfig.scale, engineRef.current);
     World.add(engineRef.current.world, largeTower);
   };
 

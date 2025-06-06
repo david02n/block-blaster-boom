@@ -1,5 +1,4 @@
-
-import { Bodies, Body } from 'matter-js';
+import { Bodies, Body, Engine } from 'matter-js';
 import { scaleValue, scalePosition } from './scalingUtils';
 
 export const createGround = (canvasWidth: number, canvasHeight: number, scale: number, groundTopY: number) => {
@@ -81,7 +80,7 @@ export const createBomb = (x: number, y: number, scale: number) => {
   });
 };
 
-export const createLargeTower = (x: number, groundTopY: number, scale: number) => {
+export const createLargeTower = (x: number, groundTopY: number, scale: number, engine?: Engine) => {
   const blocks = [];
   const blockWidth = scaleValue(30, scale);
   const blockHeight = scaleValue(20, scale);
@@ -90,40 +89,60 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number) =
   const width = 12;
   const height = 20;
 
-  console.log('Creating tower with corrected positioning:', {
+  console.log('Creating tower with physics stabilization:', {
     groundTopY,
     blockHeight,
     scale,
     firstBlockY: groundTopY - (blockHeight / 2)
   });
 
+  // Temporarily reduce gravity during tower creation if engine is provided
+  const originalGravity = engine?.world.gravity.y;
+  if (engine) {
+    engine.world.gravity.y = 0.1; // Reduced gravity during construction
+  }
+
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // FIXED: Position blocks starting from ground surface going upward
+      // Position blocks starting from ground surface going upward
       // Bottom row (row 0) sits directly on the ground surface
       const blockY = groundTopY - (blockHeight / 2) - (row * blockHeight);
 
-      console.log(`Block [${row},${col}] positioned at Y: ${blockY}, expected groundTop: ${groundTopY}`);
-
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
-        restitution: 0.2,
-        friction: 0.7,
-        density: 0.6,
+        restitution: 0.1, // Reduced bounce to prevent instability
+        friction: 0.8, // Increased friction for stability
+        density: 0.4, // Reduced density to prevent compression
         render: {
           fillStyle: getChineseFlagBlockColor(row, col, width, height),
           strokeStyle: '#333',
           lineWidth: 1,
         },
+        // Make blocks sleep initially to prevent immediate settling
+        isSleeping: true,
       });
 
-      // Add hit tracking to each block - increased from 4 to 8 hits required
+      // Add hit tracking to each block
       (block as any).hitCount = 0;
       (block as any).maxHits = 8;
 
       blocks.push(block);
     }
+  }
+
+  // Restore original gravity after a short delay to allow positioning
+  if (engine && originalGravity !== undefined) {
+    setTimeout(() => {
+      engine.world.gravity.y = originalGravity;
+      // Wake up blocks gradually to prevent sudden collapse
+      blocks.forEach((block, index) => {
+        setTimeout(() => {
+          Body.setStatic(block, false);
+          block.isSleeping = false;
+        }, index * 2); // Stagger awakening by 2ms per block
+      });
+    }, 100); // Wait 100ms before restoring gravity
   }
 
   return blocks;
