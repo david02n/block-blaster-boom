@@ -51,15 +51,15 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const runner = Runner.create();
     runnerRef.current = runner;
 
-    // Create world objects with better positioning like the reference image
+    // Create world objects positioned on the actual ground level
     const ground = createGround(canvasWidth, canvasHeight);
     World.add(engine.world, ground);
 
     const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);
 
-    // Position buildings on the visual ground level (80% down the screen)
-    const groundLevel = canvasHeight * 0.8;
+    // Position buildings on the actual ground level (bottom of screen where grass is)
+    const groundLevel = canvasHeight - 80; // Just above the actual ground physics body
     const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10); // Main building - larger and central
     const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);  // Side building
     World.add(engine.world, [...building1, ...building2]);
@@ -97,7 +97,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
 
     const canvasWidth = renderRef.current.canvas.width;
     const canvasHeight = renderRef.current.canvas.height;
-    const groundLevel = canvasHeight * 0.8; // Match the visual ground level
+    const groundLevel = canvasHeight - 80; // Match the actual ground level
 
     const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10);
     const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);

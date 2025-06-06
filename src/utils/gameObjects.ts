@@ -2,8 +2,8 @@
 import { Bodies } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
-  // Position ground at approximately 80% down the screen to match the background image ground level
-  const groundY = canvasHeight * 0.8;
+  // Position ground at the bottom where the green grass is visible
+  const groundY = canvasHeight - 40; // Near the bottom of the screen
   return Bodies.rectangle(canvasWidth / 2, groundY, canvasWidth, 80, {
     isStatic: true,
     label: 'ground',
@@ -16,9 +16,9 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
 };
 
 export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
-  // Position catapult at far left, like in the reference image
+  // Position catapult at far left, sitting on the ground
   const x = canvasWidth * 0.15; // 15% from left edge
-  const y = canvasHeight - 150; // Higher up from ground
+  const y = canvasHeight - 120; // Just above the ground level
   
   return Bodies.rectangle(x, y, 100, 100, {
     isStatic: true,
