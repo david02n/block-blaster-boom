@@ -7,6 +7,8 @@ export class AudioManager {
   constructor() {
     // Initialize AudioContext on first user interaction
     this.initAudioContext();
+    // Load the custom sound file
+    this.loadCustomSound();
   }
 
   private async initAudioContext() {
@@ -18,6 +20,11 @@ export class AudioManager {
         await this.audioContext.resume();
       }
     }
+  }
+
+  private async loadCustomSound() {
+    // Load the custom sound file from the provided URL
+    await this.loadAudio('https://jumpshare.com/s/KOk2Jn3IIlrHZF6oHOSq', 'trump-china');
   }
 
   async loadAudio(url: string, name: string): Promise<void> {
@@ -61,26 +68,25 @@ export class AudioManager {
     }
   }
 
-  // Create a simple "China" voice synthesis as fallback
+  // Play the custom Trump China sound
   async playTrumpChina(): Promise<void> {
     try {
       await this.initAudioContext();
-      if (!this.audioContext) return;
-
-      // Try to play the loaded audio first
+      
+      // Try to play the loaded custom audio first
       if (this.audioBuffers.has('trump-china')) {
         await this.playSound('trump-china', 0.7);
         return;
       }
 
-      // Fallback: Use speech synthesis
+      // Fallback: Use speech synthesis if custom audio fails to load
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance('China');
         utterance.rate = 0.8;
         utterance.pitch = 0.8;
         utterance.volume = 0.7;
         speechSynthesis.speak(utterance);
-        console.log('Playing speech synthesis: China');
+        console.log('Playing speech synthesis fallback: China');
       }
     } catch (error) {
       console.error('Failed to play Trump China sound:', error);
