@@ -55,8 +55,10 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     World.add(engine.world, catapult);
 
     // Position single large tower properly on the right ground segment
-    const groundLevel = canvasHeight - (10 * scaleConfig.scale);
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel, scaleConfig.scale);
+    // Calculate the actual ground surface level (top of the ground body)
+    const groundBodyY = canvasHeight - (10 * scaleConfig.scale);
+    const groundSurfaceLevel = groundBodyY - (10 * scaleConfig.scale); // Subtract half ground height to get surface
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundSurfaceLevel, scaleConfig.scale);
     World.add(engine.world, largeTower);
 
     // Add mouse control
@@ -113,10 +115,13 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const canvasWidth = containerRect.width;
     const canvasHeight = containerRect.height;
     const scaleConfig = calculateScale(canvasWidth, canvasHeight);
-    const groundLevel = canvasHeight - (10 * scaleConfig.scale);
+    
+    // Calculate the correct ground surface level
+    const groundBodyY = canvasHeight - (10 * scaleConfig.scale);
+    const groundSurfaceLevel = groundBodyY - (10 * scaleConfig.scale);
 
     // Create single large tower on the right ground segment
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel, scaleConfig.scale);
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundSurfaceLevel, scaleConfig.scale);
     World.add(engineRef.current.world, largeTower);
   };
 

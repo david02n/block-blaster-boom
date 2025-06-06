@@ -1,3 +1,4 @@
+
 import { Bodies, Body } from 'matter-js';
 import { scaleValue, scalePosition } from './scalingUtils';
 
@@ -90,13 +91,14 @@ export const createLargeTower = (x: number, groundY: number, scale: number) => {
   const width = 12;
   const height = 20;
 
-  // Calculate the actual ground surface level
-  const actualGroundLevel = groundY + scaleValue(10, scale);
+  // The groundY parameter is already the surface level, so we build up from there
+  const groundSurfaceLevel = groundY;
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      const blockY = actualGroundLevel - (row * blockHeight) - (blockHeight / 2);
+      // Position blocks above the ground surface, building upwards
+      const blockY = groundSurfaceLevel - (row * blockHeight) - (blockHeight / 2);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
