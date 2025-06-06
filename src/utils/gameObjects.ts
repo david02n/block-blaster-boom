@@ -1,4 +1,3 @@
-
 import { Bodies } from 'matter-js';
 
 export const createGround = () => {
@@ -15,7 +14,8 @@ export const createGround = () => {
 
 export const createCatapult = () => {
   // Position the catapult at bottom left corner with larger size
-  return Bodies.rectangle(120, 450, 240, 240, {
+  // Adjusted Y position to account for image height and anchor to ground
+  return Bodies.rectangle(120, 500, 240, 240, {
     isStatic: true,
     label: 'catapult',
     render: {
@@ -24,7 +24,6 @@ export const createCatapult = () => {
         texture: '/lovable-uploads/1038e1d1-b630-4ea0-bee0-1e9ad521ddab.png',
         xScale: 0.8,  // Increased from 0.3 to 0.8
         yScale: 0.8,  // Increased from 0.3 to 0.8
-        yOffset: 0.35, // Offset to position the image at the bottom of the physics body
       }
     },
   });
