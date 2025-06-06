@@ -1,4 +1,3 @@
-
 import { Bodies } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
@@ -6,9 +5,9 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
     isStatic: true,
     label: 'ground',
     render: {
-      fillStyle: '#4A7C59', // Grass green color
-      strokeStyle: '#2D5233',
-      lineWidth: 2,
+      fillStyle: 'transparent', // Make ground invisible
+      strokeStyle: 'transparent', // Make border invisible
+      lineWidth: 0,
     },
   });
 };
