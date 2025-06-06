@@ -99,15 +99,16 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
   });
 };
 
-// Create visual explosion effect for bombs
+// Create visual explosion effect for bombs with proper circular shapes
 const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadius: number) => {
   const explosionEffects: Body[] = [];
   
   // Create multiple explosion rings for dramatic effect
   for (let i = 0; i < 3; i++) {
     setTimeout(() => {
-      const explosionEffect = Body.create({
-        position: { x, y },
+      const initialRadius = 10 + i * 5;
+      
+      const explosionEffect = Bodies.circle(x, y, initialRadius, {
         render: {
           fillStyle: i === 0 ? '#FFFF00' : '#FF6600', // Yellow center, orange outer
           strokeStyle: '#FF0000',
@@ -117,15 +118,6 @@ const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadi
         isSensor: true,
         label: 'explosion',
       });
-      
-      // Make it a circle shape
-      const initialRadius = 10 + i * 5;
-      Body.setVertices(explosionEffect, [
-        { x: x - initialRadius, y: y - initialRadius },
-        { x: x + initialRadius, y: y - initialRadius },
-        { x: x + initialRadius, y: y + initialRadius },
-        { x: x - initialRadius, y: y + initialRadius }
-      ]);
       
       World.add(engine.world, explosionEffect);
       explosionEffects.push(explosionEffect);
@@ -139,20 +131,24 @@ const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadi
         if (currentRadius < targetRadius) {
           currentRadius += expansionRate;
           
-          const newVertices = [
-            { x: x - currentRadius, y: y - currentRadius },
-            { x: x + currentRadius, y: y - currentRadius },
-            { x: x + currentRadius, y: y + currentRadius },
-            { x: x - currentRadius, y: y + currentRadius }
-          ];
+          // Remove old circle and create new one with updated radius
+          World.remove(engine.world, explosionEffect);
           
-          Body.setVertices(explosionEffect, newVertices);
+          const newExplosionEffect = Bodies.circle(x, y, currentRadius, {
+            render: {
+              fillStyle: i === 0 ? 
+                `rgba(255, 255, 0, ${Math.max(0.1, 1 - (currentRadius / targetRadius) * 0.9)})` : 
+                `rgba(255, 102, 0, ${Math.max(0.1, 1 - (currentRadius / targetRadius) * 0.9)})`,
+              strokeStyle: '#FF0000',
+              lineWidth: 2,
+            },
+            isStatic: true,
+            isSensor: true,
+            label: 'explosion',
+          });
           
-          // Fade the explosion
-          const opacity = Math.max(0.1, 1 - (currentRadius / targetRadius) * 0.9);
-          explosionEffect.render.fillStyle = i === 0 ? 
-            `rgba(255, 255, 0, ${opacity})` : 
-            `rgba(255, 102, 0, ${opacity})`;
+          World.add(engine.world, newExplosionEffect);
+          explosionEffects.push(newExplosionEffect);
           
           setTimeout(expandRing, 40);
         }

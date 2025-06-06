@@ -1,4 +1,3 @@
-
 import { Events, Engine, Body, World } from 'matter-js';
 
 export const setupCollisionDetection = (
@@ -25,8 +24,8 @@ export const setupCollisionDetection = (
           // Increment hit count
           (block as any).hitCount = ((block as any).hitCount || 0) + 1;
           
-          // Check if block should explode
-          if ((block as any).hitCount >= (block as any).maxHits) {
+          // Check if block should explode (increased from 2 to 4 hits)
+          if ((block as any).hitCount >= 4) {
             console.log('Block exploding after', (block as any).hitCount, 'hits');
             explodeBlock(engine, block, destroyedBlocksRef, setBlocksDestroyed, setScore);
           } else {
@@ -132,8 +131,8 @@ const explodeBlock = (
         // Increment hit count
         (affectedBlock as any).hitCount = ((affectedBlock as any).hitCount || 0) + 1;
         
-        // Check if this block should also explode (cascade!)
-        if ((affectedBlock as any).hitCount >= (affectedBlock as any).maxHits) {
+        // Check if this block should also explode (cascade!) - still requires 4 hits
+        if ((affectedBlock as any).hitCount >= 4) {
           console.log('Cascade explosion triggered for block:', affectedBlock.id);
           // Recursive explosion!
           explodeBlock(engine, affectedBlock, destroyedBlocksRef, setBlocksDestroyed, setScore);
@@ -148,13 +147,12 @@ const explodeBlock = (
   }, 100); // Small delay for cascade effect
 };
 
-// Create visual explosion effect
+// Create visual explosion effect with proper circle shape
 const createExplosionEffect = (engine: Engine, x: number, y: number, maxRadius: number) => {
   const explosionEffects: Body[] = [];
   
   // Create initial explosion effect
-  const explosionEffect = Body.create({
-    position: { x, y },
+  const explosionEffect = Bodies.circle(x, y, 5, {
     render: {
       fillStyle: '#FF6600',
       strokeStyle: '#FF0000',
@@ -164,14 +162,6 @@ const createExplosionEffect = (engine: Engine, x: number, y: number, maxRadius: 
     isSensor: true,
     label: 'explosion',
   });
-  
-  // Make it a circle shape
-  Body.setVertices(explosionEffect, [
-    { x: x - 5, y: y - 5 },
-    { x: x + 5, y: y - 5 },
-    { x: x + 5, y: y + 5 },
-    { x: x - 5, y: y + 5 }
-  ]);
   
   World.add(engine.world, explosionEffect);
   explosionEffects.push(explosionEffect);
@@ -184,19 +174,22 @@ const createExplosionEffect = (engine: Engine, x: number, y: number, maxRadius: 
     if (currentRadius < maxRadius) {
       currentRadius += expansionRate;
       
-      // Update the explosion effect size
-      const newVertices = [
-        { x: x - currentRadius, y: y - currentRadius },
-        { x: x + currentRadius, y: y - currentRadius },
-        { x: x + currentRadius, y: y + currentRadius },
-        { x: x - currentRadius, y: y + currentRadius }
-      ];
+      // Create a new circle body with the expanded radius
+      World.remove(engine.world, explosionEffect);
       
-      Body.setVertices(explosionEffect, newVertices);
+      const newExplosionEffect = Bodies.circle(x, y, currentRadius, {
+        render: {
+          fillStyle: `rgba(255, 102, 0, ${1 - (currentRadius / maxRadius) * 0.8})`,
+          strokeStyle: '#FF0000',
+          lineWidth: 3,
+        },
+        isStatic: true,
+        isSensor: true,
+        label: 'explosion',
+      });
       
-      // Fade the explosion
-      const opacity = 1 - (currentRadius / maxRadius) * 0.8;
-      explosionEffect.render.fillStyle = `rgba(255, 102, 0, ${opacity})`;
+      World.add(engine.world, newExplosionEffect);
+      explosionEffects.push(newExplosionEffect);
       
       setTimeout(expandExplosion, 30);
     } else {
