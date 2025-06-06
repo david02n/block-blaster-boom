@@ -54,21 +54,16 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const catapult = createCatapult(canvasWidth, canvasHeight, scaleConfig.scale);
     World.add(engine.world, catapult);
 
-    // Position single large tower properly on the right ground segment
-    // Calculate the correct ground surface level
-    const groundBodyY = canvasHeight - (10 * scaleConfig.scale); // Center of ground body
-    const groundHeight = 20 * scaleConfig.scale; // Total ground height
-    const groundSurfaceLevel = groundBodyY - (groundHeight / 2); // Top surface of ground
+    // Use a fixed ground level that doesn't change with resizing
+    const fixedGroundLevel = canvasHeight - 50; // Fixed 50px from bottom
     
-    console.log('Ground positioning:', {
+    console.log('Fixed ground positioning:', {
       canvasHeight,
       scale: scaleConfig.scale,
-      groundBodyY,
-      groundHeight,
-      groundSurfaceLevel
+      fixedGroundLevel
     });
     
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundSurfaceLevel, scaleConfig.scale);
+    const largeTower = createLargeTower(canvasWidth * 0.8, fixedGroundLevel, scaleConfig.scale);
     World.add(engine.world, largeTower);
 
     // Add mouse control
@@ -126,13 +121,11 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const canvasHeight = containerRect.height;
     const scaleConfig = calculateScale(canvasWidth, canvasHeight);
     
-    // Calculate the correct ground surface level
-    const groundBodyY = canvasHeight - (10 * scaleConfig.scale);
-    const groundHeight = 20 * scaleConfig.scale;
-    const groundSurfaceLevel = groundBodyY - (groundHeight / 2);
+    // Use the same fixed ground level
+    const fixedGroundLevel = canvasHeight - 50;
 
     // Create single large tower on the right ground segment
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundSurfaceLevel, scaleConfig.scale);
+    const largeTower = createLargeTower(canvasWidth * 0.8, fixedGroundLevel, scaleConfig.scale);
     World.add(engineRef.current.world, largeTower);
   };
 
