@@ -24,8 +24,8 @@ export const setupCollisionDetection = (
           // Increment hit count
           (block as any).hitCount = ((block as any).hitCount || 0) + 1;
           
-          // Check if block should explode (increased from 2 to 4 hits)
-          if ((block as any).hitCount >= 4) {
+          // Check if block should explode (increased from 4 to 8 hits for direct bomb hits)
+          if ((block as any).hitCount >= 8) {
             console.log('Block exploding after', (block as any).hitCount, 'hits');
             explodeBlock(engine, block, destroyedBlocksRef, setBlocksDestroyed, setScore);
           } else {
@@ -124,15 +124,15 @@ const explodeBlock = (
   // Remove the exploded block immediately
   World.remove(engine.world, block);
   
-  // Damage affected blocks with a delay to create cascade effect
+  // Damage affected blocks with a delay to create cascade effect - but less damage
   setTimeout(() => {
     affectedBlocks.forEach((affectedBlock) => {
       if (!destroyedBlocksRef.current.has(affectedBlock)) {
-        // Increment hit count
+        // Increment hit count by only 1 for explosion damage (reduced from previous)
         (affectedBlock as any).hitCount = ((affectedBlock as any).hitCount || 0) + 1;
         
-        // Check if this block should also explode (cascade!) - still requires 4 hits
-        if ((affectedBlock as any).hitCount >= 4) {
+        // Check if this block should also explode - now requires 8 hits total
+        if ((affectedBlock as any).hitCount >= 8) {
           console.log('Cascade explosion triggered for block:', affectedBlock.id);
           // Recursive explosion!
           explodeBlock(engine, affectedBlock, destroyedBlocksRef, setBlocksDestroyed, setScore);
@@ -140,11 +140,11 @@ const explodeBlock = (
           // Just damage the block
           affectedBlock.render.fillStyle = darkenColor(affectedBlock.render.fillStyle as string);
           console.log('Block damaged by explosion, hits:', (affectedBlock as any).hitCount);
-          setScore(prev => prev + 3); // Score for explosion damage
+          setScore(prev => prev + 1); // Reduced score for explosion damage
         }
       }
     });
-  }, 100); // Small delay for cascade effect
+  }, 150); // Slightly longer delay for cascade effect
 };
 
 // Create visual explosion effect with proper circle shape

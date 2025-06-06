@@ -110,9 +110,9 @@ export const createLargeTower = (x: number, groundY: number) => {
         },
       });
 
-      // Add hit tracking to each block
+      // Add hit tracking to each block - increased from 4 to 8 hits required
       (block as any).hitCount = 0;
-      (block as any).maxHits = 4;
+      (block as any).maxHits = 8;
 
       blocks.push(block);
     }
