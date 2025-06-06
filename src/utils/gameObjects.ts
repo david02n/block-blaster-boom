@@ -90,11 +90,12 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
   const width = 12;
   const height = 20;
 
-  console.log('Creating tower with bottom edge on ground surface:', {
+  console.log('Creating tower with correct positioning above ground:', {
     groundTopY,
     blockHeight,
     scale,
-    firstBlockY: groundTopY - blockHeight // Bottom edge of bottom blocks at ground surface
+    bottomRowCenterY: groundTopY - (blockHeight / 2),
+    topRowCenterY: groundTopY - (blockHeight / 2) - ((height - 1) * blockHeight)
   });
 
   // Temporarily reduce gravity during tower creation if engine is provided
@@ -106,10 +107,11 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // Position blocks so bottom edge of bottom row sits exactly on ground surface
-      // Bottom row (row 0) center is at groundTopY - (blockHeight / 2)
-      // Each subsequent row is positioned one blockHeight higher
+      // Correct positioning: bottom row (row 0) center at groundTopY - (blockHeight / 2)
+      // Each subsequent row goes HIGHER (subtract more from Y coordinate)
       const blockY = groundTopY - (blockHeight / 2) - (row * blockHeight);
+
+      console.log(`Block at row ${row}, col ${col}: Y = ${blockY}`);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
