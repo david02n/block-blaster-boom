@@ -1,16 +1,15 @@
-
 import { Bodies, Body, Engine } from 'matter-js';
 import { scaleValue, scalePosition } from './scalingUtils';
 
 export const createGround = (canvasWidth: number, canvasHeight: number, scale: number, groundTopY: number) => {
-  // Create segmented ground with gaps - positioned at groundTopY
+  // Create continuous ground without gaps - positioned at groundTopY
   const groundHeight = scaleValue(20, scale);
   const groundCenterY = groundTopY + (groundHeight / 2);
   const grounds = [];
   
-  // Left ground segment (under catapult area) - scaled positioning
-  const leftGroundWidth = scaleValue(540, scale);
-  const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundCenterY, leftGroundWidth, groundHeight, {
+  // Create a single continuous ground piece that spans the entire width
+  const groundWidth = canvasWidth;
+  const ground = Bodies.rectangle(canvasWidth / 2, groundCenterY, groundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
     render: {
@@ -19,27 +18,14 @@ export const createGround = (canvasWidth: number, canvasHeight: number, scale: n
       lineWidth: 1,
     },
   });
-  grounds.push(leftGround);
+  grounds.push(ground);
   
-  // Right ground segment (under building area) - scaled positioning
-  const rightGroundStart = scaleValue(720, scale);
-  const rightGroundWidth = scaleValue(480, scale);
-  const rightGround = Bodies.rectangle(
-    rightGroundStart + rightGroundWidth / 2, 
-    groundCenterY, 
-    rightGroundWidth, 
-    groundHeight, 
-    {
-      isStatic: true,
-      label: 'ground',
-      render: {
-        fillStyle: '#8B4513',
-        strokeStyle: '#654321',
-        lineWidth: 1,
-      },
-    }
-  );
-  grounds.push(rightGround);
+  console.log('Created continuous ground:', {
+    width: groundWidth,
+    centerY: groundCenterY,
+    topY: groundTopY,
+    canvasWidth
+  });
   
   return grounds;
 };
@@ -90,12 +76,13 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
   const width = 12;
   const height = 20;
 
-  console.log('Building tower from bottom up with precise positioning:', {
+  console.log('Building tower with continuous ground support:', {
     groundTopY,
     blockWidth,
     blockHeight,
     scale,
-    towerCenterX: x
+    towerCenterX: x,
+    towerBottomY: groundTopY - (blockHeight / 2)
   });
 
   // Disable gravity completely during construction
@@ -112,18 +99,18 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - (width - 1) / 2) * blockWidth;
       
-      // Position blocks precisely: 
-      // Bottom row (row 0): bottom edge at groundTopY
+      // Position blocks precisely on the continuous ground
+      // Bottom row (row 0): bottom edge exactly at groundTopY
       // Each subsequent row: stacked directly on top of previous row
       const blockY = groundTopY - (blockHeight / 2) - (row * blockHeight);
 
-      console.log(`Block row ${row}, col ${col}: X=${blockX}, Y=${blockY}, bottomEdge=${blockY + blockHeight/2}`);
+      console.log(`Block row ${row}, col ${col}: X=${blockX}, Y=${blockY}, bottomEdge=${blockY + blockHeight/2}, groundTopY=${groundTopY}`);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
         restitution: 0.1,
-        friction: 0.9, // High friction for stability
-        density: 0.3, // Light density to prevent compression
+        friction: 0.9,
+        density: 0.3,
         render: {
           fillStyle: getChineseFlagBlockColor(row, col, width, height),
           strokeStyle: '#333',
@@ -162,7 +149,7 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number, e
           console.log(`Row ${row} blocks made dynamic`);
         }, row * 50); // 50ms delay between rows
       }
-    }, 200); // Wait 200ms before starting to restore physics
+    }, 500); // Increased wait time to ensure proper positioning
   }
 
   return blocks;

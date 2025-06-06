@@ -1,4 +1,3 @@
-
 import { Events, Engine, Body, World, Bodies } from 'matter-js';
 import { scaleValue } from './scalingUtils';
 
@@ -42,7 +41,7 @@ export const setupCollisionDetection = (
     });
   });
 
-  // Check for blocks falling off the island (screen boundaries)
+  // Check for blocks falling off the island (screen boundaries) - made less aggressive
   const checkBoundaries = () => {
     const canvasWidth = engine.render?.canvas?.width || 1920;
     const canvasHeight = engine.render?.canvas?.height || 1080;
@@ -51,15 +50,18 @@ export const setupCollisionDetection = (
     
     engine.world.bodies.forEach((body) => {
       if (body.label === 'block' && !destroyedBlocksRef.current.has(body)) {
-        // Check if block fell off the sides or below the screen
-        if (body.position.x < -50 || 
-            body.position.x > canvasWidth + 50 || 
-            body.position.y > canvasHeight + 100) {
+        // More generous boundaries - only remove blocks that are way off screen
+        const margin = 200; // Increased margin
+        if (body.position.x < -margin || 
+            body.position.x > canvasWidth + margin || 
+            body.position.y > canvasHeight + margin) {
           
-          console.log('Block fell off island:', { 
+          console.log('Block fell way off screen:', { 
             id: body.id, 
             x: body.position.x, 
-            y: body.position.y 
+            y: body.position.y,
+            canvasWidth,
+            canvasHeight
           });
           
           blocksToRemove.push(body);
@@ -72,12 +74,19 @@ export const setupCollisionDetection = (
     
     // Remove fallen blocks from the world
     if (blocksToRemove.length > 0) {
+      console.log(`Removing ${blocksToRemove.length} blocks that fell off screen`);
       World.remove(engine.world, blocksToRemove);
     }
   };
 
-  // Check boundaries every frame
-  Events.on(engine, 'beforeUpdate', checkBoundaries);
+  // Check boundaries every few frames instead of every frame
+  let frameCount = 0;
+  Events.on(engine, 'beforeUpdate', () => {
+    frameCount++;
+    if (frameCount % 60 === 0) { // Check every 60 frames (roughly once per second)
+      checkBoundaries();
+    }
+  });
 };
 
 // Function to explode a block and create a cascade effect
