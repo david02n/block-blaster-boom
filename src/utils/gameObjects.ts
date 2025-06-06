@@ -90,18 +90,21 @@ export const createLargeTower = (x: number, groundTopY: number, scale: number) =
   const width = 12;
   const height = 20;
 
-  console.log('Creating tower with zero-based positioning:', {
+  console.log('Creating tower with corrected positioning:', {
     groundTopY,
     blockHeight,
-    scale
+    scale,
+    firstBlockY: groundTopY - (blockHeight / 2)
   });
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // Position blocks starting from zero (ground top), building upwards (negative Y)
-      // Row 0 sits right on the ground, row 1 is one block height above, etc.
-      const blockY = groundTopY - (row * blockHeight) - (blockHeight / 2);
+      // FIXED: Position blocks starting from ground surface going upward
+      // Bottom row (row 0) sits directly on the ground surface
+      const blockY = groundTopY - (blockHeight / 2) - (row * blockHeight);
+
+      console.log(`Block [${row},${col}] positioned at Y: ${blockY}, expected groundTop: ${groundTopY}`);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
         label: 'block',
