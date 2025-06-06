@@ -63,7 +63,7 @@ export const fireBomb = (
 
 const explodeBomb = (engine: Engine, bomb: Body) => {
   const explosionRadius = 150;
-  const explosionForce = 0.8; // Increased from 0.05 to 0.8 for much stronger blast
+  const explosionForce = 2; // Increased from 0.8 to 2 for even stronger blast
   
   console.log('Creating explosion at:', bomb.position);
   
