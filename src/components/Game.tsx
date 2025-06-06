@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Engine, Render, World, Bodies, Body, Events, Mouse, MouseConstraint } from 'matter-js';
+import { Engine, Render, World, Bodies, Body, Events, Mouse, MouseConstraint, Runner } from 'matter-js';
 import { GameUI } from './GameUI';
 import { createBuilding, createBomb, createGround, createCatapult } from '../utils/gameObjects';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ export const Game = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Engine>();
   const renderRef = useRef<Render>();
+  const runnerRef = useRef<Runner>();
   const destroyedBlocksRef = useRef<Set<Body>>(new Set());
   const [power, setPower] = useState(50);
   const [angle, setAngle] = useState(-45);
@@ -39,6 +40,10 @@ export const Game = () => {
       },
     });
     renderRef.current = render;
+
+    // Create runner (replaces deprecated Engine.run)
+    const runner = Runner.create();
+    runnerRef.current = runner;
 
     // Create ground
     const ground = createGround();
@@ -78,6 +83,8 @@ export const Game = () => {
           const block = bodyA.label === 'block' ? bodyA : bodyB;
           const bomb = bodyA.label === 'bomb' ? bodyA : bodyB;
           
+          console.log('Bomb hit block!', { block: block.id, bomb: bomb.id });
+          
           // Mark block for destruction using Set
           if (!destroyedBlocksRef.current.has(block)) {
             destroyedBlocksRef.current.add(block);
@@ -107,43 +114,63 @@ export const Game = () => {
       });
     });
 
-    // Start the engine
-    Engine.run(engine);
+    // Start the engine and renderer
+    Runner.run(runner, engine);
     Render.run(render);
 
     return () => {
       if (renderRef.current) {
         Render.stop(renderRef.current);
       }
-      if (engineRef.current) {
+      if (runnerRef.current && engineRef.current) {
+        Runner.stop(runnerRef.current);
         Engine.clear(engineRef.current);
       }
     };
   }, []);
 
   const fireBomb = () => {
-    if (!engineRef.current || bombsLeft <= 0) return;
+    if (!engineRef.current || bombsLeft <= 0) {
+      console.log('Cannot fire bomb:', { engine: !!engineRef.current, bombsLeft });
+      return;
+    }
+
+    console.log('Firing bomb with:', { power, angle, bombsLeft });
 
     const engine = engineRef.current;
     const radianAngle = (angle * Math.PI) / 180;
-    const force = power / 1000;
+    
+    // Increase force multiplier for better visibility
+    const force = power / 500; // Changed from 1000 to 500 for stronger force
+    
+    console.log('Calculated force:', { radianAngle, force });
 
     const bomb = createBomb(150, 450);
     
     // Apply force based on angle and power
-    Body.applyForce(bomb, bomb.position, {
+    const forceVector = {
       x: Math.cos(radianAngle) * force,
       y: Math.sin(radianAngle) * force,
-    });
-
+    };
+    
+    console.log('Applying force vector:', forceVector);
+    
     World.add(engine.world, bomb);
+    
+    // Apply force after a small delay to ensure bomb is in world
+    setTimeout(() => {
+      Body.applyForce(bomb, bomb.position, forceVector);
+      console.log('Force applied to bomb at position:', bomb.position);
+    }, 10);
+
     setBombsLeft(prev => prev - 1);
     setGameStarted(true);
 
-    // Remove bomb after 5 seconds
+    // Remove bomb after 8 seconds (increased from 5)
     setTimeout(() => {
+      console.log('Removing bomb from world');
       World.remove(engine.world, bomb);
-    }, 5000);
+    }, 8000);
 
     toast(`Bomb fired! ${bombsLeft - 1} bombs remaining`);
   };
