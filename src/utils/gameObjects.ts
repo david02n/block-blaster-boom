@@ -19,9 +19,9 @@ export const createCatapult = () => {
     render: {
       fillStyle: '#F5F5DC', // Fallback beige color if sprite fails
       sprite: {
-        texture: '/lovable-uploads/1038e1d1-b630-4ea0-bee0-1e9ad521ddab.png',
-        xScale: 1.0,
-        yScale: 1.0,
+        texture: '/lovable-uploads/9cfd24cd-98ca-41dc-9bf8-9495bed975b2.png',
+        xScale: 0.8,
+        yScale: 0.8,
       }
     },
   });
