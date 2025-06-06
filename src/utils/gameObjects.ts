@@ -3,26 +3,26 @@ import { Bodies, Body } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
   // Create segmented ground with gaps - positioned at the very bottom
-  const groundY = canvasHeight - 10; // Moved even closer to bottom
-  const groundHeight = 20; // Thinner ground for cleaner look
+  const groundY = canvasHeight - 10;
+  const groundHeight = 20;
   const grounds = [];
   
-  // Left ground segment (under catapult area)
-  const leftGroundWidth = canvasWidth * 0.45; // Extended to 45%
+  // Left ground segment (under catapult area) - fixed positioning
+  const leftGroundWidth = 540; // Fixed width instead of percentage
   const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
     render: {
-      fillStyle: '#8B4513', // Brown color to make it visible
+      fillStyle: '#8B4513',
       strokeStyle: '#654321',
       lineWidth: 1,
     },
   });
   grounds.push(leftGround);
   
-  // Right ground segment (under building area) 
-  const rightGroundStart = canvasWidth * 0.60; // Start at 60% for clear gap
-  const rightGroundWidth = canvasWidth * 0.40; // 40% width
+  // Right ground segment (under building area) - fixed positioning
+  const rightGroundStart = 720; // Fixed position instead of percentage
+  const rightGroundWidth = 480; // Fixed width instead of percentage
   const rightGround = Bodies.rectangle(
     rightGroundStart + rightGroundWidth / 2, 
     groundY, 
@@ -32,7 +32,7 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
       isStatic: true,
       label: 'ground',
       render: {
-        fillStyle: '#8B4513', // Brown color to make it visible
+        fillStyle: '#8B4513',
         strokeStyle: '#654321',
         lineWidth: 1,
       },
@@ -44,17 +44,17 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
 };
 
 export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
-  // Position catapult properly on the left ground segment
-  const x = canvasWidth * 0.2; // 20% from left - well within the left ground segment
-  const groundLevel = canvasHeight - 10; // Match the ground level
-  const catapultHeight = 60; // Half the sprite height for proper positioning
-  const y = groundLevel - catapultHeight; // Position so bottom sits on ground
+  // Fixed position for catapult
+  const x = 240; // Fixed position instead of percentage
+  const groundLevel = canvasHeight - 10;
+  const catapultHeight = 60;
+  const y = groundLevel - catapultHeight;
   
   return Bodies.rectangle(x, y, 120, 120, {
     isStatic: true,
     label: 'catapult',
     render: {
-      fillStyle: '#8B4513', // Fallback brown color if sprite fails
+      fillStyle: '#8B4513',
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
         xScale: 0.6,
@@ -71,7 +71,7 @@ export const createBomb = (x: number, y: number) => {
     friction: 0.4,
     density: 1.5,
     render: {
-      fillStyle: '#FF0000', // Fallback red color if sprite fails
+      fillStyle: '#FF0000',
       sprite: {
         texture: '/lovable-uploads/ee772c58-4b67-4dfa-8718-a30d36b28466.png',
         xScale: 0.16,
@@ -86,17 +86,16 @@ export const createLargeTower = (x: number, groundY: number) => {
   const blockWidth = 30;
   const blockHeight = 20;
   
-  // Create a much larger tower - 12 blocks wide by 20 blocks high
+  // Create a tower - 12 blocks wide by 20 blocks high
   const width = 12;
   const height = 20;
 
   // Calculate the actual ground surface level
-  const actualGroundLevel = groundY + 10; // Since ground body is at groundY but extends up/down
+  const actualGroundLevel = groundY + 10;
 
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
       const blockX = x + (col - width / 2) * blockWidth;
-      // Position blocks to sit directly on the ground surface
       const blockY = actualGroundLevel - (row * blockHeight) - (blockHeight / 2);
 
       const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
@@ -122,24 +121,19 @@ export const createLargeTower = (x: number, groundY: number) => {
   return blocks;
 };
 
-// Legacy function for backwards compatibility - now creates the large tower
+// Legacy function for backwards compatibility
 export const createBuilding = (x: number, groundY: number, width?: number, height?: number) => {
   return createLargeTower(x, groundY);
 };
 
 const getChineseFlagBlockColor = (row: number, col: number, width: number, height: number): string => {
-  // Chinese flag has red background with yellow stars
-  // We'll create a simplified pattern with red background and yellow accents for stars
-  
-  // Most blocks are red (Chinese flag background)
-  const redColor = '#DE2910'; // Official Chinese flag red
-  const yellowColor = '#FFDE00'; // Official Chinese flag yellow
+  const redColor = '#DE2910';
+  const yellowColor = '#FFDE00';
   
   // Create a pattern that resembles the Chinese flag layout
-  // Large star position (upper left area)
   const isLargeStarArea = row < height * 0.3 && col < width * 0.3;
   
-  // Small stars positions (arranged around the large star)
+  // Small stars positions
   const isSmallStar1 = row === Math.floor(height * 0.15) && col === Math.floor(width * 0.4);
   const isSmallStar2 = row === Math.floor(height * 0.25) && col === Math.floor(width * 0.45);
   const isSmallStar3 = row === Math.floor(height * 0.35) && col === Math.floor(width * 0.4);
@@ -157,6 +151,5 @@ const getChineseFlagBlockColor = (row: number, col: number, width: number, heigh
     return yellowColor;
   }
   
-  // Default red background
   return redColor;
 };

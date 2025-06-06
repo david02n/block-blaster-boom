@@ -23,23 +23,17 @@ export const fireBomb = (
   audioManager.playTrumpTariff();
 
   const radianAngle = (angle * Math.PI) / 180;
-  
-  // Doubled the force again for maximum power
-  const force = power * 4; // Doubled again from *2 to *4
+  const force = power * 4;
   
   console.log('Calculated force:', { radianAngle, force });
 
-  // Get canvas dimensions for responsive positioning
-  const canvasWidth = renderRef.current.canvas.width;
-  const canvasHeight = renderRef.current.canvas.height;
-  
-  // Position bomb at catapult location (20% from left, above catapult)
-  const bombX = canvasWidth * 0.2; // Match catapult X position
-  const bombY = canvasHeight - 120; // Positioned above the catapult
+  // Use fixed positioning for bomb launch
+  const bombX = 240; // Match fixed catapult position
+  const bombY = 480; // Fixed position above catapult
   
   const bomb = createBomb(bombX, bombY);
   
-  // Apply force based on angle and power with doubled multiplier
+  // Apply force based on angle and power
   const forceVector = {
     x: Math.cos(radianAngle) * force,
     y: Math.sin(radianAngle) * force,
@@ -59,7 +53,6 @@ export const fireBomb = (
   setTimeout(() => {
     console.log('Bomb exploding at position:', bomb.position);
     explodeBomb(engine, bomb);
-    // Remove the bomb immediately when it explodes
     World.remove(engine.world, bomb);
   }, 3000);
 
@@ -70,15 +63,13 @@ export const fireBomb = (
 };
 
 const explodeBomb = (engine: Engine, bomb: Body) => {
-  const explosionRadius = 120; // Larger initial blast
+  const explosionRadius = 120;
   const explosionForce = 25;
   
   console.log('Creating bomb explosion at:', bomb.position);
   
-  // Create visual explosion effect
   createBombExplosionEffect(engine, bomb.position.x, bomb.position.y, explosionRadius);
   
-  // Apply explosion force to all blocks in range
   engine.world.bodies.forEach((body) => {
     if (body.label === 'block' && !body.isStatic) {
       const distance = Math.sqrt(
@@ -87,30 +78,25 @@ const explodeBomb = (engine: Engine, bomb: Body) => {
       );
       
       if (distance < explosionRadius) {
-        // Calculate force direction from explosion center to block
         const forceX = (body.position.x - bomb.position.x) / distance * explosionForce;
         const forceY = (body.position.y - bomb.position.y) / distance * explosionForce;
         Body.applyForce(body, body.position, { x: forceX, y: forceY });
         console.log('Bomb explosion force applied to block:', body.id);
-        
-        // The collision detection system will handle the hit counting and potential cascading
       }
     }
   });
 };
 
-// Create visual explosion effect for bombs with proper circular shapes
 const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadius: number) => {
   const explosionEffects: Body[] = [];
   
-  // Create multiple explosion rings for dramatic effect
   for (let i = 0; i < 3; i++) {
     setTimeout(() => {
       const initialRadius = 10 + i * 5;
       
       const explosionEffect = Bodies.circle(x, y, initialRadius, {
         render: {
-          fillStyle: i === 0 ? '#FFFF00' : '#FF6600', // Yellow center, orange outer
+          fillStyle: i === 0 ? '#FFFF00' : '#FF6600',
           strokeStyle: '#FF0000',
           lineWidth: 2,
         },
@@ -122,7 +108,6 @@ const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadi
       World.add(engine.world, explosionEffect);
       explosionEffects.push(explosionEffect);
       
-      // Animate this ring
       let currentRadius = initialRadius;
       const targetRadius = maxRadius - i * 20;
       const expansionRate = 15;
@@ -131,7 +116,6 @@ const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadi
         if (currentRadius < targetRadius) {
           currentRadius += expansionRate;
           
-          // Remove old circle and create new one with updated radius
           World.remove(engine.world, explosionEffect);
           
           const newExplosionEffect = Bodies.circle(x, y, currentRadius, {
@@ -155,10 +139,9 @@ const createBombExplosionEffect = (engine: Engine, x: number, y: number, maxRadi
       };
       
       expandRing();
-    }, i * 100); // Stagger the rings
+    }, i * 100);
   }
   
-  // Clean up all explosion effects
   setTimeout(() => {
     explosionEffects.forEach(effect => {
       World.remove(engine.world, effect);

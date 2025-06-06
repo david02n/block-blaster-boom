@@ -11,28 +11,16 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   useEffect(() => {
     if (!sceneRef.current) return;
 
-    // Calculate responsive dimensions while maintaining 16:9 aspect ratio
-    const container = sceneRef.current;
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
-    
-    // Use 16:9 aspect ratio (1920:1080)
-    const aspectRatio = 16 / 9;
-    let canvasWidth = containerWidth;
-    let canvasHeight = containerWidth / aspectRatio;
-    
-    // If height is too tall, adjust based on height
-    if (canvasHeight > containerHeight) {
-      canvasHeight = containerHeight;
-      canvasWidth = containerHeight * aspectRatio;
-    }
+    // Use fixed dimensions instead of responsive sizing
+    const canvasWidth = 1200;
+    const canvasHeight = 600;
 
     // Create engine
     const engine = Engine.create();
     engine.world.gravity.y = 0.8;
     engineRef.current = engine;
 
-    // Create renderer with responsive dimensions and background image
+    // Create renderer with fixed dimensions
     const render = Render.create({
       element: sceneRef.current,
       engine: engine,
@@ -40,7 +28,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
         width: canvasWidth,
         height: canvasHeight,
         wireframes: false,
-        background: 'transparent', // Make background transparent to show CSS background
+        background: 'transparent',
         showAngleIndicator: false,
         showVelocity: false,
       },
@@ -59,8 +47,8 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     World.add(engine.world, catapult);
 
     // Position single large tower properly on the right ground segment
-    const groundLevel = canvasHeight - 10; // Match the updated ground level
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel); // 80% from left - on right ground segment
+    const groundLevel = canvasHeight - 10;
+    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel);
     World.add(engine.world, largeTower);
 
     // Add mouse control
@@ -94,9 +82,10 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   const recreateBuildings = () => {
     if (!engineRef.current || !renderRef.current) return;
 
-    const canvasWidth = renderRef.current.canvas.width;
-    const canvasHeight = renderRef.current.canvas.height;
-    const groundLevel = canvasHeight - 10; // Match the updated ground level
+    // Use fixed dimensions
+    const canvasWidth = 1200;
+    const canvasHeight = 600;
+    const groundLevel = canvasHeight - 10;
 
     // Create single large tower on the right ground segment
     const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel);
