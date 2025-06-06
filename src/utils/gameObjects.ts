@@ -54,8 +54,8 @@ export const createCatapult = (canvasWidth: number, canvasHeight: number) => {
       fillStyle: '#8B4513', // Fallback brown color if sprite fails
       sprite: {
         texture: '/lovable-uploads/cdb2d2c0-0e95-4dcd-8c9f-832245349c16.png',
-        xScale: 0.5,  // Doubled from 0.25 to 0.5
-        yScale: 0.5,  // Doubled from 0.25 to 0.5
+        xScale: 1.0,  // Doubled from 0.5 to 1.0
+        yScale: 1.0,  // Doubled from 0.5 to 1.0
       }
     },
   });
