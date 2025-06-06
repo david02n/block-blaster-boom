@@ -2,7 +2,9 @@
 import { Bodies } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
-  return Bodies.rectangle(canvasWidth / 2, canvasHeight + 40, canvasWidth, 80, {
+  // Position ground at approximately 80% down the screen to match the background image ground level
+  const groundY = canvasHeight * 0.8;
+  return Bodies.rectangle(canvasWidth / 2, groundY, canvasWidth, 80, {
     isStatic: true,
     label: 'ground',
     render: {

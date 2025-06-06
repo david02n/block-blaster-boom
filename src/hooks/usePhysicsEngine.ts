@@ -1,3 +1,4 @@
+
 import { useRef, useEffect } from 'react';
 import { Engine, Render, World, Runner, Mouse, MouseConstraint } from 'matter-js';
 import { createBuilding, createGround, createCatapult } from '../utils/gameObjects';
@@ -57,8 +58,8 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);
 
-    // Position buildings more centrally like the White House in reference
-    const groundLevel = canvasHeight - 80;
+    // Position buildings on the visual ground level (80% down the screen)
+    const groundLevel = canvasHeight * 0.8;
     const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10); // Main building - larger and central
     const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);  // Side building
     World.add(engine.world, [...building1, ...building2]);
@@ -96,7 +97,7 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
 
     const canvasWidth = renderRef.current.canvas.width;
     const canvasHeight = renderRef.current.canvas.height;
-    const groundLevel = canvasHeight - 80;
+    const groundLevel = canvasHeight * 0.8; // Match the visual ground level
 
     const building1 = createBuilding(canvasWidth * 0.6, groundLevel, 6, 10);
     const building2 = createBuilding(canvasWidth * 0.8, groundLevel, 4, 7);
