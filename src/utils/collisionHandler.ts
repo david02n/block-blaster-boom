@@ -10,29 +10,37 @@ export const setupCollisionDetection = (
     event.pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
       
-      // Check if bomb hits a block
-      if ((bodyA.label === 'bomb' && bodyB.label === 'block') || 
-          (bodyA.label === 'block' && bodyB.label === 'bomb')) {
+      // Check if bomb hits a block or character
+      if ((bodyA.label === 'bomb' && (bodyB.label === 'block' || bodyB.label === 'character')) || 
+          ((bodyA.label === 'block' || bodyA.label === 'character') && bodyB.label === 'bomb')) {
         
-        const block = bodyA.label === 'block' ? bodyA : bodyB;
+        const isCharacter = bodyA.label === 'character' || bodyB.label === 'character';
+        const target = bodyA.label === 'block' || bodyA.label === 'character' ? bodyA : bodyB;
         const bomb = bodyA.label === 'bomb' ? bodyA : bodyB;
         
-        // Only process if block hasn't been destroyed yet
-        if (!destroyedBlocksRef.current.has(block)) {
-          console.log('Bomb hit block!', { block: block.id, bomb: bomb.id });
-          
-          // Increment hit count
-          (block as any).hitCount = ((block as any).hitCount || 0) + 1;
-          
-          // Check if block should explode (increased from 4 to 8 hits for direct bomb hits)
-          if ((block as any).hitCount >= 8) {
-            console.log('Block exploding after', (block as any).hitCount, 'hits');
-            explodeBlock(engine, block, destroyedBlocksRef, setBlocksDestroyed, setScore);
+        // Only process if target hasn't been destroyed yet
+        if (!destroyedBlocksRef.current.has(target)) {
+          if (isCharacter) {
+            // Character hit logic
+            (target as any).health = ((target as any).health || 5) - 1;
+            (target as any).showHealthBar = true;
+            console.log('Character hit! Health:', (target as any).health);
+            setScore(prev => prev + 10); // More points for hitting character
+            if ((target as any).health <= 0) {
+              console.log('Character defeated!');
+              explodeCharacter(engine, target, destroyedBlocksRef, setBlocksDestroyed, setScore);
+            }
           } else {
-            // Block hit but not destroyed - change appearance to show damage
-            block.render.fillStyle = darkenColor(block.render.fillStyle as string);
-            console.log('Block damaged, hits:', (block as any).hitCount);
-            setScore(prev => prev + 2); // Small score for hitting but not destroying
+            // Block logic (existing)
+            (target as any).hitCount = ((target as any).hitCount || 0) + 1;
+            if ((target as any).hitCount >= 8) {
+              console.log('Block exploding after', (target as any).hitCount, 'hits');
+              explodeBlock(engine, target, destroyedBlocksRef, setBlocksDestroyed, setScore);
+            } else {
+              target.render.fillStyle = darkenColor(target.render.fillStyle as string);
+              console.log('Block damaged, hits:', (target as any).hitCount);
+              setScore(prev => prev + 2);
+            }
           }
         }
       }
@@ -92,8 +100,8 @@ const explodeBlock = (
   
   console.log('Block exploding at position:', block.position);
   
-  const explosionRadius = 80; // Smaller radius for cascade effect
-  const explosionForce = 15;
+  const explosionRadius = 60; // Reduced from 80 to 60 for more focused explosions
+  const explosionForce = 8; // Reduced from 15 to 8 for less destructive force
   
   // Create visual explosion effect
   createExplosionEffect(engine, block.position.x, block.position.y, explosionRadius);
@@ -226,4 +234,47 @@ export const applyExplosionDamage = (
   
   // This function is now handled by the explodeBlock function for better cascade effects
   console.log('applyExplosionDamage called but handled by explodeBlock system');
+};
+
+// Add this function for red particle burst
+const explodeCharacter = (
+  engine: Engine,
+  character: Body,
+  destroyedBlocksRef: React.MutableRefObject<Set<Body>>,
+  setBlocksDestroyed: (value: React.SetStateAction<number>) => void,
+  setScore: (value: React.SetStateAction<number>) => void
+) => {
+  destroyedBlocksRef.current.add(character);
+  setBlocksDestroyed(prev => prev + 1);
+  setScore(prev => prev + 50); // Big score for defeating character
+  // Red particle burst effect
+  createRedParticleBurst(engine, character.position.x, character.position.y);
+  World.remove(engine.world, character);
+};
+
+const createRedParticleBurst = (engine: Engine, x: number, y: number) => {
+  const particles: Body[] = [];
+  const numParticles = 20;
+  for (let i = 0; i < numParticles; i++) {
+    const angle = (2 * Math.PI * i) / numParticles;
+    const speed = 8 + Math.random() * 4;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed;
+    const particle = Bodies.circle(x, y, 6, {
+      label: 'character-particle',
+      isStatic: false,
+      isSensor: true,
+      render: {
+        fillStyle: '#d90429',
+        strokeStyle: '#a10015',
+        lineWidth: 1,
+      },
+    });
+    Body.setVelocity(particle, { x: vx, y: vy });
+    particles.push(particle);
+  }
+  World.add(engine.world, particles);
+  setTimeout(() => {
+    World.remove(engine.world, particles);
+  }, 900);
 };

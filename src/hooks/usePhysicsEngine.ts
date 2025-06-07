@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from 'react';
 import { Engine, Render, World, Runner, Mouse, MouseConstraint } from 'matter-js';
 import { createBuilding, createGround, createCatapult } from '../utils/gameObjects';
@@ -48,11 +47,13 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     World.add(engine.world, catapult);
 
     // Create building with layout
-    const buildingBlocks = createBuilding(
+    const { blocks: buildingBlocks } = createBuilding(
       CHINA_BUILDING,
       canvasWidth * 0.75, // Position building 75% across the screen
       canvasHeight
-    ).blocks;
+    );
+
+    // Add all blocks to world at once
     World.add(engine.world, buildingBlocks);
 
     // Add mouse control
@@ -89,14 +90,15 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     // Use fixed dimensions
     const canvasWidth = 1200;
     const canvasHeight = 600;
-    const groundLevel = canvasHeight - 10;
 
-    // Create building with layout
-    const buildingBlocks = createBuilding(
+    // Create building with layout - using same position as initial creation
+    const { blocks: buildingBlocks } = createBuilding(
       CHINA_BUILDING,
-      canvasWidth * 0.8, // Position building 80% across the screen
-      groundLevel
-    ).blocks;
+      canvasWidth * 0.75,
+      canvasHeight
+    );
+
+    // Add all blocks to world at once
     World.add(engineRef.current.world, buildingBlocks);
   };
 

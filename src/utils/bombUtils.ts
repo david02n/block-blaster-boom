@@ -71,8 +71,8 @@ export const fireBomb = (
 };
 
 const explodeBomb = (engine: Engine, bomb: Body) => {
-  const explosionRadius = 120;
-  const explosionForce = 25;
+  const explosionRadius = 100;
+  const explosionForce = 12;
   
   console.log('Creating bomb explosion at:', bomb.position);
   

@@ -1,14 +1,13 @@
-
 import { Bodies, Body, Constraint } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
-  // Create segmented ground with gaps - positioned 25px up from bottom
-  const groundY = canvasHeight - 35; //ed up 25px from bottom
-  const groundHeight = 10
+  // Create segmented ground with gaps - positioned closer to bottom
+  const groundY = canvasHeight - 25; // Reduced from 35 to 25
+  const groundHeight = 20; // Increased from 10 to 20 for better stability
   const grounds = [];
   
   // Left ground segment (under catapult area) - fixed positioning
-  const leftGroundWidth = 540; // Fixed width instead of percentage
+  const leftGroundWidth = 540;
   const leftGround = Bodies.rectangle(leftGroundWidth / 2, groundY, leftGroundWidth, groundHeight, {
     isStatic: true,
     label: 'ground',
@@ -21,8 +20,8 @@ export const createGround = (canvasWidth: number, canvasHeight: number) => {
   grounds.push(leftGround);
   
   // Right ground segment (under building area) - fixed positioning
-  const rightGroundStart = 720; // Fixed position instead of percentage
-  const rightGroundWidth = 480; // Fixed width instead of percentage
+  const rightGroundStart = 700; // Adjusted from 720 to 700 to reduce gap
+  const rightGroundWidth = 500; // Increased from 480 to 500 to ensure better coverage
   const rightGround = Bodies.rectangle(
     rightGroundStart + rightGroundWidth / 2, 
     groundY, 
@@ -84,10 +83,13 @@ export const createBomb = (x: number, y: number) => {
 export const createBuilding = (layout: any, x: number, groundY: number) => {
   const blocks: Body[] = [];
   const constraints: Constraint[] = [];
-  const blockSize = 25; // 25px blocks
+  const blockSize = 25;
   const buildingCenterX = x;
-  const actualGroundLevel = groundY -90; // Base ground level
-  const verticalOffset = 25; // Additional offset for building
+  const actualGroundLevel = groundY - 25;
+  const verticalOffset = 10;
+
+  // First, create all blocks without adding them to the world
+  const blockPositions = new Map(); // Store block positions for stability check
 
   // Create blocks from grid, skipping cells covered by objects
   layout.grid.forEach((row, rowIndex) => {
@@ -105,7 +107,6 @@ export const createBuilding = (layout: any, x: number, groundY: number) => {
       if (isCovered) return;
 
       // Calculate block position relative to the bottom of the building
-      // Add small gap between blocks (2 pixels)
       const gap = 2;
       
       // Calculate grid position (centered)
@@ -116,12 +117,15 @@ export const createBuilding = (layout: any, x: number, groundY: number) => {
       const blockX = buildingCenterX + gridX;
       const blockY = actualGroundLevel - gridY + verticalOffset;
 
+      // Store position for stability check
+      blockPositions.set(`${colIndex},${rowIndex}`, { x: blockX, y: blockY });
+
       // Create regular block
       const block = Bodies.rectangle(blockX, blockY, blockSize, blockSize, {
         label: 'block',
-        restitution: 0.1, // Reduced bounciness
-        friction: 1.0, // Increased friction
-        density: 1.5, // Increased density for stability
+        restitution: 0.1,
+        friction: 1.0,
+        density: 1.5,
         render: {
           fillStyle: '#8B4513',
           strokeStyle: '#654321',
@@ -137,22 +141,20 @@ export const createBuilding = (layout: any, x: number, groundY: number) => {
     });
   });
 
-  // Create character block as a physics body
+  // Create character block
   layout.objects.forEach(object => {
     if (object.type === 'character') {
-      // Calculate position for character
       const gap = 2;
       const gridX = (object.x - layout.grid[0].length / 2) * (blockSize + gap);
       const gridY = (layout.grid.length - object.y - 1) * (blockSize + gap);
       const objX = buildingCenterX + gridX;
       const objY = actualGroundLevel - gridY + verticalOffset;
 
-      // Create character block with exact dimensions
       const characterBlock = Bodies.rectangle(
         objX,
         objY,
-        blockSize * 3, // Make character block wider for stability
-        blockSize * 2, // Make character block taller
+        blockSize * 3,
+        blockSize * 2,
         {
           label: 'character',
           restitution: 0.1,
@@ -165,23 +167,38 @@ export const createBuilding = (layout: any, x: number, groundY: number) => {
             lineWidth: 1,
             sprite: {
               texture: object.texture,
-              xScale: 0.5, // Half size
-              yScale: 0.5  // Half size
+              xScale: 0.5,
+              yScale: 0.5
             }
           }
         }
       );
+      (characterBlock as any).health = 5;
+      (characterBlock as any).maxHealth = 5;
+      (characterBlock as any).showHealthBar = false;
       blocks.push(characterBlock);
     }
   });
 
-  return {
-    blocks,
-    constraints
-  };
+  // Verify block positions for stability
+  blocks.forEach(block => {
+    // Check if block is too far from its intended position
+    const intendedPos = Array.from(blockPositions.values()).find(pos => 
+      Math.abs(pos.x - block.position.x) < 1 && 
+      Math.abs(pos.y - block.position.y) < 1
+    );
+    
+    if (intendedPos) {
+      // Ensure block is exactly at its intended position
+      Body.setPosition(block, { x: intendedPos.x, y: intendedPos.y });
+      // Set initial velocity to zero
+      Body.setVelocity(block, { x: 0, y: 0 });
+      Body.setAngularVelocity(block, 0);
+    }
+  });
+
+  return { blocks, constraints };
 };
-
-
 
 const getChineseFlagBlockColor = (row: number, col: number, width: number, height: number): string => {
   const redColor = '#DE2910';
