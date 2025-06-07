@@ -1,10 +1,10 @@
 
-import { Bodies, Body } from 'matter-js';
+import { Bodies, Body, Constraint } from 'matter-js';
 
 export const createGround = (canvasWidth: number, canvasHeight: number) => {
-  // Create segmented ground with gaps - positioned at the very bottom
-  const groundY = canvasHeight - 10;
-  const groundHeight = 20;
+  // Create segmented ground with gaps - positioned 25px up from bottom
+  const groundY = canvasHeight - 35; //ed up 25px from bottom
+  const groundHeight = 10
   const grounds = [];
   
   // Left ground segment (under catapult area) - fixed positioning
@@ -81,50 +81,107 @@ export const createBomb = (x: number, y: number) => {
   });
 };
 
-export const createLargeTower = (x: number, groundY: number) => {
-  const blocks = [];
-  const blockWidth = 30;
-  const blockHeight = 20;
-  
-  // Create a tower - 12 blocks wide by 20 blocks high
-  const width = 12;
-  const height = 20;
+export const createBuilding = (layout: any, x: number, groundY: number) => {
+  const blocks: Body[] = [];
+  const constraints: Constraint[] = [];
+  const blockSize = 25; // 25px blocks
+  const buildingCenterX = x;
+  const actualGroundLevel = groundY -90; // Base ground level
+  const verticalOffset = 25; // Additional offset for building
 
-  // Calculate the actual ground surface level
-  const actualGroundLevel = groundY + 10;
+  // Create blocks from grid, skipping cells covered by objects
+  layout.grid.forEach((row, rowIndex) => {
+    row.forEach((blockType, colIndex) => {
+      // Skip empty spaces
+      if (blockType === 0) return;
 
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
-      const blockX = x + (col - width / 2) * blockWidth;
-      const blockY = actualGroundLevel - (row * blockHeight) - (blockHeight / 2);
+      // Check if this cell is covered by any object
+      const isCovered = layout.objects.some(obj =>
+        colIndex >= obj.x && colIndex < obj.x + obj.w &&
+        rowIndex >= obj.y && rowIndex < obj.y + obj.h
+      );
 
-      const block = Bodies.rectangle(blockX, blockY, blockWidth, blockHeight, {
+      // Skip if this cell is covered by an object
+      if (isCovered) return;
+
+      // Calculate block position relative to the bottom of the building
+      // Add small gap between blocks (2 pixels)
+      const gap = 2;
+      
+      // Calculate grid position (centered)
+      const gridX = (colIndex - layout.grid[0].length / 2) * (blockSize + gap);
+      const gridY = (layout.grid.length - rowIndex - 1) * (blockSize + gap);
+      
+      // Position relative to building center and ground
+      const blockX = buildingCenterX + gridX;
+      const blockY = actualGroundLevel - gridY + verticalOffset;
+
+      // Create regular block
+      const block = Bodies.rectangle(blockX, blockY, blockSize, blockSize, {
         label: 'block',
-        restitution: 0.2,
-        friction: 0.7,
-        density: 0.6,
+        restitution: 0.1, // Reduced bounciness
+        friction: 1.0, // Increased friction
+        density: 1.5, // Increased density for stability
         render: {
-          fillStyle: getChineseFlagBlockColor(row, col, width, height),
-          strokeStyle: '#333',
+          fillStyle: '#8B4513',
+          strokeStyle: '#654321',
           lineWidth: 1,
+          sprite: {
+            texture: layout.blockTypes[blockType].texture,
+            xScale: 0.5,
+            yScale: 0.5,
+          }
         },
       });
-
-      // Add hit tracking to each block - increased from 4 to 8 hits required
-      (block as any).hitCount = 0;
-      (block as any).maxHits = 8;
-
       blocks.push(block);
+    });
+  });
+
+  // Create character block as a physics body
+  layout.objects.forEach(object => {
+    if (object.type === 'character') {
+      // Calculate position for character
+      const gap = 2;
+      const gridX = (object.x - layout.grid[0].length / 2) * (blockSize + gap);
+      const gridY = (layout.grid.length - object.y - 1) * (blockSize + gap);
+      const objX = buildingCenterX + gridX;
+      const objY = actualGroundLevel - gridY + verticalOffset;
+
+      // Create character block with exact dimensions
+      const characterBlock = Bodies.rectangle(
+        objX,
+        objY,
+        blockSize * 3, // Make character block wider for stability
+        blockSize * 2, // Make character block taller
+        {
+          label: 'character',
+          restitution: 0.1,
+          friction: 1.0,
+          density: 1.5,
+          isStatic: false,
+          render: {
+            fillStyle: '#8B4513',
+            strokeStyle: '#654321',
+            lineWidth: 1,
+            sprite: {
+              texture: object.texture,
+              xScale: 0.5, // Half size
+              yScale: 0.5  // Half size
+            }
+          }
+        }
+      );
+      blocks.push(characterBlock);
     }
-  }
+  });
 
-  return blocks;
+  return {
+    blocks,
+    constraints
+  };
 };
 
-// Legacy function for backwards compatibility
-export const createBuilding = (x: number, groundY: number, width?: number, height?: number) => {
-  return createLargeTower(x, groundY);
-};
+
 
 const getChineseFlagBlockColor = (row: number, col: number, width: number, height: number): string => {
   const redColor = '#DE2910';

@@ -1,4 +1,3 @@
-
 import { Engine, World, Body, Bodies } from 'matter-js';
 import { createBomb } from './gameObjects';
 import { audioManager } from './audioUtils';
@@ -20,8 +19,8 @@ export const fireBomb = (
 
   console.log('Firing bomb with:', { power, angle, bombsLeft });
 
-  // Play Trump "Tariff" sound effect
-  audioManager.playTrumpTariff();
+  // Play random catapult sound effect
+  audioManager.playRandomSound('catapult');
 
   const radianAngle = (angle * Math.PI) / 180;
   const force = power * 4;
@@ -53,8 +52,16 @@ export const fireBomb = (
   // Explode bomb after 3 seconds
   setTimeout(() => {
     console.log('Bomb exploding at position:', bomb.position);
+    audioManager.playRandomSound('explosion');
     explodeBomb(engine, bomb);
     World.remove(engine.world, bomb);
+    // Remove any constraints connected to the bomb
+    const constraints = engine.world.constraints;
+    for (let i = constraints.length - 1; i >= 0; i--) {
+      if (constraints[i].bodyA === bomb || constraints[i].bodyB === bomb) {
+        World.remove(engine.world, constraints[i]);
+      }
+    }
   }, 3000);
 
   setBombsLeft(prev => prev - 1);

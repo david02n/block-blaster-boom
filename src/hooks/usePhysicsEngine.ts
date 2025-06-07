@@ -1,7 +1,8 @@
 
 import { useRef, useEffect } from 'react';
 import { Engine, Render, World, Runner, Mouse, MouseConstraint } from 'matter-js';
-import { createLargeTower, createGround, createCatapult } from '../utils/gameObjects';
+import { createBuilding, createGround, createCatapult } from '../utils/gameObjects';
+import { CHINA_BUILDING } from '../utils/buildingLayouts';
 
 export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
   const engineRef = useRef<Engine>();
@@ -46,10 +47,13 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const catapult = createCatapult(canvasWidth, canvasHeight);
     World.add(engine.world, catapult);
 
-    // Position single large tower properly on the right ground segment
-    const groundLevel = canvasHeight - 10;
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel);
-    World.add(engine.world, largeTower);
+    // Create building with layout
+    const buildingBlocks = createBuilding(
+      CHINA_BUILDING,
+      canvasWidth * 0.75, // Position building 75% across the screen
+      canvasHeight
+    ).blocks;
+    World.add(engine.world, buildingBlocks);
 
     // Add mouse control
     const mouse = Mouse.create(render.canvas);
@@ -87,9 +91,13 @@ export const usePhysicsEngine = (sceneRef: React.RefObject<HTMLDivElement>) => {
     const canvasHeight = 600;
     const groundLevel = canvasHeight - 10;
 
-    // Create single large tower on the right ground segment
-    const largeTower = createLargeTower(canvasWidth * 0.8, groundLevel);
-    World.add(engineRef.current.world, largeTower);
+    // Create building with layout
+    const buildingBlocks = createBuilding(
+      CHINA_BUILDING,
+      canvasWidth * 0.8, // Position building 80% across the screen
+      groundLevel
+    ).blocks;
+    World.add(engineRef.current.world, buildingBlocks);
   };
 
   const removeBodiesExceptStatic = () => {
