@@ -8,6 +8,7 @@ import { Engine, World, Bodies, Body } from 'matter-js';
 import { audioManager } from '../utils/audioUtils';
 import { Button } from '@/components/ui/button';
 import { Bomb, RotateCcw } from 'lucide-react';
+import { RadialJoystick } from './RadialJoystick';
 
 export const Game = () => {
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -259,16 +260,18 @@ export const Game = () => {
             </Button>
           </div>
 
-          {/* How to play overlay */}
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg z-20 text-xs text-gray-600">
-            <div className="font-semibold mb-1">How to Play:</div>
-            <ul className="space-y-1">
-              <li>• Use ←→ to adjust angle</li>
-              <li>• Use +/- to set power</li>
-              <li>• Click Fire! to launch</li>
-              <li>• Destroy blocks for points</li>
-              <li>• Reset when out of bombs</li>
-            </ul>
+          {/* How to play overlay replaced with joystick */}
+          <div className="absolute top-4 left-4 z-20">
+            <RadialJoystick
+              angle={gameState.angle}
+              power={gameState.power}
+              setAngle={gameState.setAngle}
+              setPower={gameState.setPower}
+              minPower={10}
+              maxPower={100}
+              size={200}
+              onFire={handleFireBomb}
+            />
           </div>
         </div>
       </div>
